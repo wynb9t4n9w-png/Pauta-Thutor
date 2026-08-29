@@ -749,7 +749,7 @@ function renderArquivo(){
 
 /* ---------- NAVEGAÇÃO ---------- */
 function irPara(p){
-  ["jornal","quinzena","clientes","arquivo"].forEach(function(k){
+  ["jornal","quinzena","arquivo"].forEach(function(k){
     el("tab-"+k).setAttribute("aria-selected", String(k===p));
     el("p-"+k).hidden = (k!==p);
   });

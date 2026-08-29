@@ -39,6 +39,10 @@ RESET = (
 )
 
 DADOS_RE = re.compile(r"(/\*DADOS\*/)(.*?)(/\*FIM\*/)", re.S)
+# irPara() percorre esta lista e faz el("tab-"+k).setAttribute(...). Removida a
+# aba Clientes, el("tab-clientes") vira null e a troca de abas quebra no meio:
+# o painel aparece, mas vazio, porque a funcao estoura antes de renderiza-lo.
+NAV_RE = re.compile(r'\["jornal","quinzena","clientes","arquivo"\]')
 TAB_CLIENTES_RE = re.compile(r"[ \t]*<button[^>]*id=\"tab-clientes\"[^>]*>.*?</button>\s*\n?", re.S)
 TITLE_RE = re.compile(r"<title>(.*?)</title>", re.S)
 
@@ -97,6 +101,13 @@ def build(origem: Path, destino: Path) -> dict:
     corpo, n = TAB_CLIENTES_RE.subn("", corpo)
     if n == 0:
         raise SystemExit("FALHA: aba 'Clientes' nao encontrada — o layout mudou, revise o script.")
+
+    corpo, n = NAV_RE.subn('["jornal","quinzena","arquivo"]', corpo)
+    if n == 0:
+        raise SystemExit(
+            "FALHA: a lista de abas de irPara() nao foi encontrada. Sem esse ajuste "
+            "as abas '15 dias' e 'Arquivo' abrem vazias — o layout mudou, revise o script."
+        )
 
     titulo = TITLE_RE.search(corpo)
     titulo = titulo.group(1).strip() if titulo else "Pauta Thutor"

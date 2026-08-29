@@ -95,11 +95,21 @@ de semana. O que não passa é edição sem coleta.
 ### Testes
 
 ```bash
-python3 tools/teste_validador.py
+python3 tools/teste_validador.py   # o portão da coleta
+python3 tools/teste_pagina.py      # a página pública num navegador real
 ```
 
-Nove cenários, incluindo a reprodução do incidente de 56 segundos. Todos
-conferem o código de saída, que é o que de fato trava a publicação.
+O primeiro cobre nove cenários, incluindo a reprodução do incidente de 56
+segundos, e confere o código de saída — que é o que de fato trava a publicação.
+
+O segundo abre `docs/index.html` no Chromium, **clica em cada aba** e exige que
+os três painéis fiquem visíveis, com conteúdo, e sem nenhum erro de JavaScript.
+Ele existe por causa de um segundo erro real: ao remover a aba administrativa
+"Clientes", a função `irPara()` continuou percorrendo a lista
+`["jornal","quinzena","clientes","arquivo"]` e chamando
+`el("tab-clientes").setAttribute(...)`, que virou `null`. A função estourava no
+meio e as abas "15 dias" e "Arquivo" abriam vazias. Um teste que só olhava o
+painel do Jornal não pegou isso — por isso este teste clica em todas.
 
 ## Privacidade
 
