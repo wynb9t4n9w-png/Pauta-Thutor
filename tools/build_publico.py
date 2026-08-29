@@ -9,6 +9,7 @@ somente-leitura, servido pelo GitHub Pages num endereco fixo.
 O que e removido antes de publicar:
   - o bloco "auth" inteiro (usuario, salt e hash da senha);
   - os campos internos de cada cliente: query, excluir, revisar, razao, site;
+  - o bloco "cobertura" de cada edicao (telemetria interna da coleta);
   - a aba "Clientes" (painel administrativo).
 
 Uso:
@@ -64,6 +65,12 @@ def sanitiza(estado: dict) -> dict:
     limpo["clientes"] = [
         {k: c[k] for k in CAMPOS_PUBLICOS if k in c}
         for c in estado.get("clientes", [])
+    ]
+    # "cobertura" e telemetria da coleta, lida pelo validador. Nao interessa
+    # ao leitor e nao precisa ficar exposta na pagina publica.
+    limpo["edicoes"] = [
+        {k: v for k, v in ed.items() if k != "cobertura"}
+        for ed in estado.get("edicoes", [])
     ]
     return limpo
 

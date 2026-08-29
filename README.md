@@ -24,8 +24,10 @@ Uma tarefa agendada roda todo dia às 07:30 (horário de São Paulo) e:
 
 1. lê o estado atual do artifact;
 2. busca notícias dos clientes ativos das últimas 24–48 h;
-3. monta a edição do dia e republica o artifact;
-4. gera `docs/index.html` com o script abaixo e faz commit neste repositório.
+3. monta a edição do dia e registra a cobertura da coleta;
+4. **valida** a edição — se não passar, não publica;
+5. republica o artifact;
+6. gera `docs/index.html` e faz commit neste repositório.
 
 O GitHub Pages serve `docs/` e atualiza sozinho a cada commit. O endereço
 público nunca muda, então basta compartilhá-lo uma vez.
@@ -47,6 +49,57 @@ exatamente o que a renderização do jornal usa.
 
 O script falha em voz alta (`FALHA:`) se o bloco de dados ou a aba Clientes
 não forem encontrados, em vez de publicar uma página meio pronta.
+
+## Por que existe um validador
+
+Em 29/08/2026 o disparo automático terminou em **56 segundos**. Não pesquisou
+nada, não publicou edição nenhuma — e mesmo assim foi registrado como
+`SUCCEEDED`. O jornal seguiu mostrando a notícia da véspera e ninguém percebeu,
+porque uma execução que falha em silêncio é indistinguível de uma que deu certo.
+
+O remédio não é confiar na boa vontade da rotina. É um portão que ela precisa
+atravessar antes de publicar:
+
+```bash
+python3 tools/valida_edicao.py <estado.html|estado.json>
+```
+
+Para passar, a edição na posição 0 precisa trazer um bloco `cobertura`
+provando que a coleta aconteceu:
+
+```json
+"cobertura": {
+  "clientes_varridos": 31,
+  "buscas": 62,
+  "iniciado_em":  "2026-08-30T07:30:11-03:00",
+  "concluido_em": "2026-08-30T07:41:52-03:00"
+}
+```
+
+O validador recusa a edição, com saída 1, quando:
+
+| Situação | Por quê |
+|---|---|
+| coleta durou menos de 120 s | 31 clientes em duas camadas levam minutos |
+| `clientes_varridos` < clientes ativos | algum cliente ficou sem cobertura |
+| `buscas` < 1 por cliente ativo | o passo de busca foi pulado |
+| bloco `cobertura` ausente | sem prova de que a coleta rodou |
+| edição não é de hoje | o jornal mostraria a edição anterior |
+| `auth` ou a carteira sumiram | o estado foi corrompido |
+| url repetida, ou já publicada antes | polui a aba "15 dias" |
+| `cliente_id` inexistente, data futura, editoria inválida | dado inventado |
+
+Edição **vazia passa** — dia sem notícia é resultado legítimo, sobretudo no fim
+de semana. O que não passa é edição sem coleta.
+
+### Testes
+
+```bash
+python3 tools/teste_validador.py
+```
+
+Nove cenários, incluindo a reprodução do incidente de 56 segundos. Todos
+conferem o código de saída, que é o que de fato trava a publicação.
 
 ## Privacidade
 
