@@ -1,0 +1,806 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found]){display:none!important}</style>
+<meta name="robots" content="noindex,nofollow">
+<meta name="description" content="Clipping diario da carteira de clientes da consultoria Thutor.">
+<meta property="og:title" content="Pauta Thutor">
+</head>
+<body>
+<title>Pauta Thutor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,300..800;1,400&display=swap">
+
+<style>
+/* ===========================================================================
+   PAUTA THUTOR — sistema visual Thutor (mesmo do Teste Comportamental FG)
+   Chrome teal #00798A. Editorias reaproveitam os matizes dos quadrantes.
+   =========================================================================== */
+:root{
+  --teal:#00798a; --teal-dk:#005e6c; --teal-mid:#66afb9; --teal-lt:#a2ced4; --teal-xlt:#cde4e8;
+  --gray:#bfbfbf; --gray-lt:#e6e8ea;
+  --ink:#1b2430; --mut:#5c6a76; --line:#e1e7ea; --bg:#f5f8f9; --card:#fff;
+  --REA:#ce5347; --ENC:#c68a12; --MUL:#3e9c74; --APR:#3c63ae;
+  --REA-i:#a8403a; --ENC-i:#8f6410; --MUL-i:#327a5b; --APR-i:#2f5090;
+  --REA-l:#faedeb; --ENC-l:#faf2e0; --MUL-l:#e8f4ef; --APR-l:#eaeff8;
+  --erro:#a8403a; --ok:#327a5b;
+  --r:999px;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--bg);color:var(--ink);line-height:1.55;font-size:clamp(16px,0.93rem + 0.22vw,18.5px);
+  -webkit-font-smoothing:antialiased;overflow-wrap:break-word;
+  font-family:'Source Sans 3','Source Sans Pro','Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;
+}
+a{color:var(--teal)}
+h1,h3,h4{margin:0 0 .4em;line-height:1.18;font-weight:700;letter-spacing:-.015em}
+h1{font-size:clamp(1.5rem,1.15rem + 1.7vw,2rem);color:var(--teal)}
+h3{font-size:1rem;margin-top:0;color:var(--teal)}
+p{margin:0 0 .8em}
+small,.small{font-size:.84rem;color:var(--mut)}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.wrap{max-width:1320px;margin:0 auto;padding:clamp(20px,2.2vw,34px) clamp(16px,2.6vw,32px) 90px}
+
+/* barra de seção — assinatura Thutor (stadiums sobrepostos) */
+h2{position:relative;margin:0 0 18px;font-size:0;line-height:0}
+h2 .t{
+  position:relative;z-index:3;margin-right:64px;min-height:46px;
+  background:var(--teal);color:#fff;border-radius:var(--r);
+  display:flex;align-items:center;padding:9px 24px;
+  font-size:clamp(1rem,.9rem + .5vw,1.18rem);font-weight:700;line-height:1.25;letter-spacing:-.01em;
+}
+h2::before{content:'';position:absolute;inset:0 32px 0 0;z-index:2;background:var(--teal-mid);border-radius:var(--r)}
+h2::after{content:'';position:absolute;inset:0;z-index:1;background:var(--teal-lt);border-radius:var(--r)}
+
+.card{
+  background:var(--card);border:1px solid var(--line);border-radius:20px;
+  padding:clamp(18px,1.7vw,28px);margin-bottom:20px;box-shadow:0 1px 3px rgba(0,60,70,.05);
+}
+
+/* marca */
+.topbar{
+  background:var(--teal);color:#fff;padding:clamp(11px,1.1vw,16px) clamp(16px,2.6vw,32px);
+  display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;
+  position:sticky;top:0;z-index:20;
+}
+.topbar .marca{display:flex;align-items:center;gap:14px}
+.topbar img{height:clamp(24px,2.1vw,34px);width:auto;display:block}
+.topbar .sub{font-size:.82rem;opacity:.85;font-weight:600}
+.topbar nav{display:flex;gap:6px;flex-wrap:wrap}
+.topbar nav button{
+  color:#fff;background:none;border:0;font:inherit;font-size:.84rem;font-weight:700;
+  padding:7px 15px;border-radius:var(--r);opacity:.78;cursor:pointer;min-height:auto;
+}
+.topbar nav button:hover{opacity:1;background:rgba(255,255,255,.13)}
+.topbar nav button[aria-selected="true"]{background:#fff;color:var(--teal);opacity:1}
+.topbar nav button:focus-visible{outline:2px solid #fff;outline-offset:2px}
+
+button,.btn-a{
+  font:inherit;cursor:pointer;border:0;border-radius:var(--r);
+  padding:11px 24px;font-weight:700;transition:.15s;text-decoration:none;
+  display:inline-block;text-align:center;min-height:44px;-webkit-tap-highlight-color:transparent;
+}
+.btn{background:var(--teal);color:#fff}
+.btn:hover{background:var(--teal-dk)}
+.btn:disabled{background:var(--gray);cursor:not-allowed}
+.btn-ghost{background:#fff;color:var(--teal);border:1.5px solid var(--teal-lt)}
+.btn-ghost:hover{border-color:var(--teal)}
+.btn-sm{padding:7px 16px;font-size:.85rem;min-height:auto}
+button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+
+input[type=text],input[type=search],textarea{
+  font:inherit;font-size:max(16px,1rem);padding:11px 16px;min-height:46px;
+  border:1px solid var(--line);border-radius:var(--r);width:100%;background:#fff;color:var(--ink);
+}
+textarea{border-radius:16px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.88rem;min-height:66px}
+input:focus,textarea:focus{outline:2px solid var(--teal);outline-offset:-1px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:.8rem;font-weight:700;color:var(--mut);margin-bottom:5px}
+.field .dica{display:block;font-size:.78rem;color:var(--mut);font-weight:400;margin-top:5px;line-height:1.4}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:700px){.grid2{grid-template-columns:1fr}}
+.checkbox{display:flex;gap:10px;align-items:center;font-size:.9rem;cursor:pointer;font-weight:600;color:var(--ink)}
+.checkbox input{margin:0;width:17px;height:17px;flex:none;accent-color:var(--teal)}
+
+.hint{background:var(--teal-xlt);border-left:4px solid var(--teal);padding:12px 16px;border-radius:0 14px 14px 0;font-size:.9rem;margin-bottom:14px}
+.warn{background:#fbf3e4;border-left:4px solid var(--ENC);padding:12px 16px;border-radius:0 14px 14px 0;font-size:.9rem;margin-bottom:14px}
+
+/* cabeçalho da edição */
+.ed-topo{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+.ed-data{font-size:.86rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--teal)}
+.qgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(9px,.9vw,14px)}
+@media (max-width:640px){.qgrid{grid-template-columns:repeat(2,1fr)}}
+.stat{background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:clamp(12px,1.1vw,18px) clamp(14px,1.3vw,20px)}
+.stat b{display:block;font-size:clamp(1.6rem,1.4rem + .7vw,2.3rem);font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums;color:var(--teal)}
+.stat b i{font-style:normal;font-size:1rem;font-weight:600;color:var(--mut)}
+.stat span{font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mut)}
+.stat.s-risco b{color:var(--REA)}
+.stat.s-gente b{color:var(--ENC)}
+
+/* filtros */
+.filtros{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:18px;align-items:center}
+.chip{
+  border:1.5px solid var(--line);background:#fff;color:var(--mut);
+  border-radius:var(--r);padding:7px 16px;font-size:.85rem;font-weight:700;min-height:auto;
+}
+.chip:hover{border-color:var(--teal-mid);background:#fff}
+.chip[aria-pressed="true"]{background:var(--teal);border-color:var(--teal);color:#fff}
+.chip .n{font-variant-numeric:tabular-nums;opacity:.7;margin-left:5px;font-weight:600}
+
+/* bloco por cliente */
+.bloco{margin-bottom:clamp(24px,2.2vw,34px)}
+.bloco-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:9px;padding-left:2px}
+.bloco h3{font-size:clamp(1.05rem,1rem + .22vw,1.28rem);margin:0}
+.bloco-meta{font-size:.8rem;color:var(--mut)}
+.bloco-meta .uf{font-weight:700;letter-spacing:.05em}
+
+.item{
+  background:#fff;border:1px solid var(--line);border-left:4px solid var(--teal);
+  border-radius:0 16px 16px 0;padding:clamp(13px,1.1vw,18px) clamp(16px,1.5vw,24px);margin-bottom:9px;
+  box-shadow:0 1px 3px rgba(0,60,70,.04);
+}
+.item-top{display:flex;align-items:center;gap:10px;margin-bottom:5px;flex-wrap:wrap}
+.ed{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:3px 11px;border-radius:var(--r)}
+.fonte{font-size:.78rem;color:var(--mut);font-weight:600}
+.item h4{margin:0 0 5px;font-size:clamp(1rem,.96rem + .16vw,1.16rem);line-height:1.35;font-weight:700;color:var(--ink);text-wrap:balance}
+.item h4 a{text-decoration:none;color:var(--ink)}
+.item h4 a:hover{color:var(--teal);text-decoration:underline;text-underline-offset:3px}
+.item p{margin:0;color:var(--mut);font-size:clamp(.9rem,.87rem + .12vw,1rem);line-height:1.55;max-width:90ch}
+
+.e-empresa{border-left-color:var(--teal)}     .e-empresa .ed{background:var(--teal-xlt);color:var(--teal-dk)}
+.e-setor{border-left-color:var(--APR)}        .e-setor .ed{background:var(--APR-l);color:var(--APR-i)}
+.e-gente{border-left-color:var(--ENC)}        .e-gente .ed{background:var(--ENC-l);color:var(--ENC-i)}
+.e-risco{border-left-color:var(--REA)}        .e-risco .ed{background:var(--REA-l);color:var(--REA-i)}
+
+/* silêncio */
+.silencio{margin-top:8px}
+.silencio .rot{font-size:.76rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);margin-bottom:10px}
+.silencio-lista{display:flex;flex-wrap:wrap;gap:6px}
+.mudo{font-size:.8rem;color:var(--mut);border:1px solid var(--line);border-radius:var(--r);padding:5px 13px;background:var(--bg);font-weight:600}
+
+.vazio{text-align:center;padding:38px 22px;color:var(--mut)}
+.vazio strong{display:block;color:var(--teal);font-size:1.1rem;margin-bottom:6px}
+
+/* clientes */
+.barra{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.barra .busca{flex:1;min-width:190px}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:20px;background:#fff}
+table{border-collapse:collapse;width:100%;min-width:900px;font-size:.88rem}
+th{
+  text-align:left;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;
+  color:var(--mut);padding:13px 14px;border-bottom:1px solid var(--line);white-space:nowrap;background:var(--bg);
+}
+th:first-child{border-top-left-radius:20px} th:last-child{border-top-right-radius:20px}
+td{padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:none}
+tr.off{opacity:.42}
+tr:hover td{background:#fbfdfd}
+.c-nome{font-weight:700;white-space:nowrap;color:var(--ink)}
+.c-q{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.8rem;color:var(--mut);word-break:break-word;min-width:210px}
+.c-uf{font-weight:700;color:var(--mut);letter-spacing:.04em}
+.flag{display:inline-block;margin-left:7px;font-size:.66rem;font-weight:800;background:var(--ENC-l);color:var(--ENC-i);
+  padding:2px 9px;border-radius:var(--r);letter-spacing:.05em;vertical-align:1px;cursor:help;text-transform:uppercase}
+.acoes{white-space:nowrap;text-align:right}
+.lnk{background:none;border:0;font:inherit;font-size:.82rem;font-weight:700;color:var(--mut);
+  cursor:pointer;padding:3px 7px;border-radius:var(--r);min-height:auto}
+.lnk:hover{color:var(--teal);background:var(--teal-xlt)}
+.lnk.del:hover{color:var(--erro);background:var(--REA-l)}
+
+/* portão admin */
+.portao{max-width:400px;margin:8px auto 0;background:#fff;border:1px solid var(--line);
+  border-radius:20px;padding:26px 26px 22px;box-shadow:0 1px 3px rgba(0,60,70,.05)}
+.portao .cad{width:44px;height:44px;border-radius:var(--r);background:var(--teal-xlt);
+  display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+.portao .cad svg{width:20px;height:20px;stroke:var(--teal);fill:none;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round}
+.portao h3{margin:0 0 4px;font-size:1.1rem}
+.portao .small{margin-bottom:18px;display:block}
+.portao .btn{width:100%;margin-top:4px}
+.erro-login{background:var(--REA-l);border-left:4px solid var(--erro);padding:10px 14px;
+  border-radius:0 14px 14px 0;font-size:.86rem;color:var(--erro);font-weight:600;margin-bottom:14px}
+.sessao{display:flex;align-items:center;gap:10px;font-size:.82rem;color:var(--mut);font-weight:600}
+.sessao .lnk{font-size:.82rem}
+
+/* arquivo */
+.arq{display:grid;gap:8px}
+.arq-item{
+  display:flex;justify-content:space-between;align-items:center;gap:16px;width:100%;
+  background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 20px;
+  cursor:pointer;font-size:.92rem;text-align:left;color:var(--ink);font-weight:600;min-height:auto;
+}
+.arq-item:hover{border-color:var(--teal-mid);background:#fbfdfd}
+.arq-d{font-weight:700;font-variant-numeric:tabular-nums;color:var(--teal)}
+.arq-n{font-size:.82rem;color:var(--mut);font-weight:600}
+
+/* diálogo */
+dialog{border:0;border-radius:24px;background:#fff;color:var(--ink);padding:0;
+  max-width:600px;width:calc(100% - 32px);box-shadow:0 18px 60px rgba(0,60,70,.22)}
+dialog::backdrop{background:rgba(0,60,70,.42)}
+.dlg-h{background:var(--teal);color:#fff;padding:16px 24px;font-size:1.05rem;font-weight:700}
+.dlg-b{padding:20px 24px 4px}
+.dlg-f{padding:8px 24px 20px;display:flex;gap:10px;justify-content:flex-end}
+
+#toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(14px);
+  background:var(--ink);color:#fff;padding:12px 22px;border-radius:var(--r);font-size:.9rem;font-weight:600;
+  opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;z-index:60;max-width:90vw;text-align:center}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.rodape{margin-top:34px;padding-top:16px;border-top:1px solid var(--line);
+  font-size:.8rem;color:var(--mut);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+/* telas largas: duas colunas de blocos, o jornal ocupa o espaço */
+@media (min-width:1180px){
+  .colunas{columns:2;column-gap:clamp(26px,2.6vw,44px)}
+  .colunas > .bloco{break-inside:avoid;-webkit-column-break-inside:avoid;page-break-inside:avoid;display:block}
+}
+@media (max-width:860px){
+  .topbar{position:static}
+  .topbar nav{width:100%;justify-content:flex-start}
+}
+@media (max-width:560px){
+  .qgrid{grid-template-columns:repeat(2,1fr)}
+  .topbar .sub{display:none}
+  .topbar nav button{padding:7px 12px;font-size:.8rem}
+  .bloco-head{gap:2px 8px}
+  .item{border-radius:0 13px 13px 0}
+  .barra{gap:8px}
+  .barra .busca{min-width:100%}
+  .sessao{flex-wrap:wrap}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<header class="topbar">
+  <div class="marca">
+    <img alt="Thutor" src="data:image/png;base64,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">
+    <span class="sub">Pauta diária</span>
+  </div>
+  <nav role="tablist" aria-label="Seções">
+    <button role="tab" id="tab-jornal" aria-selected="true" data-p="jornal">Jornal</button>
+    <button role="tab" id="tab-quinzena" aria-selected="false" data-p="quinzena">15 dias</button>
+    <button role="tab" id="tab-arquivo" aria-selected="false" data-p="arquivo">Arquivo</button>
+</nav>
+</header>
+
+<div class="wrap">
+  <section id="p-jornal" role="tabpanel" aria-labelledby="tab-jornal"></section>
+  <section id="p-quinzena" role="tabpanel" aria-labelledby="tab-quinzena" hidden></section>
+  <section id="p-clientes" role="tabpanel" aria-labelledby="tab-clientes" hidden></section>
+  <section id="p-arquivo" role="tabpanel" aria-labelledby="tab-arquivo" hidden></section>
+
+  <footer class="rodape">
+    <span>Thutor · clipping da carteira de clientes</span>
+    <span id="carimbo"></span>
+  </footer>
+</div>
+
+<dialog id="dlg">
+  <form method="dialog" id="frm">
+    <div class="dlg-h" id="dlgTitulo">Cliente</div>
+    <div class="dlg-b">
+      <div class="field"><label for="f-nome">Nome no jornal</label>
+        <input id="f-nome" name="nome" type="text" required maxlength="60"></div>
+      <div class="grid2">
+        <div class="field"><label for="f-razao">Razão social</label>
+          <input id="f-razao" name="razao" type="text" maxlength="120"></div>
+        <div class="field"><label for="f-setor">Setor</label>
+          <input id="f-setor" name="setor" type="text" maxlength="60"></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label for="f-uf">UF</label>
+          <input id="f-uf" name="uf" type="text" maxlength="2" style="text-transform:uppercase"></div>
+        <div class="field"><label for="f-site">Site</label>
+          <input id="f-site" name="site" type="text" maxlength="80" placeholder="empresa.com.br"></div>
+      </div>
+      <div class="field"><label for="f-query">Busca</label>
+        <textarea id="f-query" name="query" rows="2" placeholder='"Nome Oficial" termo-âncora'></textarea>
+        <span class="dica">Use aspas no nome e um termo-âncora do setor. É isto que separa notícia de ruído em nomes genéricos.</span></div>
+      <div class="field"><label for="f-excluir">Excluir se a manchete contiver</label>
+        <input id="f-excluir" name="excluir" type="text" placeholder="futebol, prefeito, cachorro">
+        <span class="dica">Separe por vírgula. Deixe vazio se o nome já for único.</span></div>
+      <div class="field"><label class="checkbox"><input type="checkbox" name="ativo" checked> Incluir na busca diária</label></div>
+    </div>
+    <div class="dlg-f">
+      <button class="btn-ghost" value="cancel" type="submit" formnovalidate>Cancelar</button>
+      <button class="btn" value="ok" type="submit">Salvar</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlgSenha">
+  <form method="dialog" id="frmSenha">
+    <div class="dlg-h">Trocar a senha de administrador</div>
+    <div class="dlg-b">
+      <div class="erro-login" id="s-erro" hidden>Senha atual incorreta.</div>
+      <div class="field"><label for="s-atual">Senha atual</label>
+        <input id="s-atual" type="password" autocomplete="current-password" required></div>
+      <div class="field"><label for="s-nova">Nova senha</label>
+        <input id="s-nova" type="password" autocomplete="new-password" minlength="8" required>
+        <span class="dica">Mínimo de 8 caracteres. Ao confirmar, a página salva uma nova versão de si mesma — a senha antiga para de valer para todo mundo.</span></div>
+    </div>
+    <div class="dlg-f">
+      <button class="btn-ghost" value="cancel" type="submit" formnovalidate>Cancelar</button>
+      <button class="btn" value="ok" type="submit">Trocar senha</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script type="application/json" id="dados">/*DADOS*/{"versao":1,"atualizado_em":"2026-08-29T08:55:00-03:00","clientes":[{"id":"almeida-jr","nome":"ALMEIDA JR","setor":"Shopping centers","uf":"SC","ativo":true},{"id":"atlas","nome":"ATLAS","setor":"Eletrodomésticos e fogões","uf":"","ativo":true},{"id":"brado","nome":"BRADO","setor":"Logística ferroviária intermodal","uf":"PR","ativo":true},{"id":"caixa-vida","nome":"CAIXA VIDA E PREVIDÊNCIA","setor":"Seguros e previdência","uf":"SP","ativo":true},{"id":"cantu","nome":"CANTU","setor":"Tecnologia e logística de pneus","uf":"","ativo":true},{"id":"ccee","nome":"CCEE","setor":"Mercado de energia elétrica","uf":"SP","ativo":true},{"id":"cemig","nome":"CEMIG","setor":"Energia elétrica","uf":"MG","ativo":true},{"id":"coop-integrada","nome":"COOP INTEGRADA","setor":"Cooperativa agroindustrial","uf":"PR","ativo":true},{"id":"crh","nome":"CRH","setor":"Gestão patrimonial e imobiliária","uf":"SC","ativo":true},{"id":"embracon","nome":"EMBRACON","setor":"Administradora de consórcios","uf":"SP","ativo":true},{"id":"engecred","nome":"ENGECRED","setor":"Cooperativa de crédito","uf":"MG","ativo":true},{"id":"familia-hansen","nome":"FAMILIA HANSEN","setor":"Holding familiar e governança","uf":"SC","ativo":true},{"id":"gazin","nome":"GAZIN","setor":"Varejo de móveis e eletro","uf":"PR","ativo":true},{"id":"neovia","nome":"NEOVIA","setor":"Engenharia e infraestrutura rodoviária","uf":"PR","ativo":true},{"id":"oji-papeis","nome":"OJI PAPÉIS","setor":"Papel e celulose","uf":"SP","ativo":true},{"id":"rocha","nome":"ROCHA","setor":"Terminais portuários e logística","uf":"","ativo":true},{"id":"sebrae-nacional","nome":"SEBRAE NACIONAL","setor":"Sistema S / apoio a MPE","uf":"DF","ativo":true},{"id":"sebrae-ba","nome":"SEBRAE/BA","setor":"Sistema S / apoio a MPE","uf":"BA","ativo":true},{"id":"sebrae-mg","nome":"SEBRAE/MG","setor":"Sistema S / apoio a MPE","uf":"MG","ativo":true},{"id":"sebrae-mt-cultura","nome":"SEBRAE/MT — CULTURA","setor":"Sistema S / apoio a MPE","uf":"MT","ativo":true},{"id":"sebrae-pa","nome":"SEBRAE/PA","setor":"Sistema S / apoio a MPE","uf":"PA","ativo":true},{"id":"sesc-df","nome":"SESC/DF","setor":"Sistema S / comércio","uf":"DF","ativo":true},{"id":"sescoop-mt","nome":"SESCOOP/MT","setor":"Cooperativismo","uf":"MT","ativo":true},{"id":"sicoob-cooplivre","nome":"SICOOB COOPLIVRE","setor":"Cooperativa de crédito","uf":"SP","ativo":true},{"id":"sicoob-sul-serrano","nome":"SICOOB SUL SERRANO","setor":"Cooperativa de crédito","uf":"ES","ativo":true},{"id":"skyfit","nome":"SKYFIT","setor":"Rede de academias","uf":"SP","ativo":true},{"id":"taesa","nome":"TAESA","setor":"Transmissão de energia","uf":"RJ","ativo":true},{"id":"tigre","nome":"TIGRE","setor":"Tubos e conexões","uf":"SC","ativo":true},{"id":"sebrae-rr","nome":"SEBRAE/RR","setor":"Sistema S / apoio a MPE","uf":"RR","ativo":true},{"id":"rex","nome":"REX","setor":"Elementos de fixação / metalmecânica","uf":"SC","ativo":true},{"id":"sebrae-se","nome":"SEBRAE/SE","setor":"Sistema S / apoio a MPE","uf":"SE","ativo":true}],"edicoes":[{"data":"2026-08-29","itens":[{"cliente_id":"sebrae-ba","editoria":"gente","titulo":"Liderança e cultura organizacional são debatidas no V Encontro de Líderes de RH do Oeste da Bahia","resumo":"Promovido pelo Sebrae, o encontro reuniu empresários e profissionais de RH em Barreiras e Luís Eduardo Magalhães nos dias 26 e 27/08. A pauta foi desenvolvimento de pessoas, cultura organizacional e liderança nos pequenos negócios da região.","fonte":"ASN Bahia","url":"https://ba.agenciasebrae.com.br/cultura-empreendedora/lideranca-e-cultura-organizacional-sao-debatidas-no-v-encontro-de-lideres-de-rh-do-oeste-da-bahia/","data":"2026-08-28"},{"cliente_id":"engecred","editoria":"empresa","titulo":"Sicoob Engecred participa do 16º Concred em Goiânia","resumo":"A diretoria da Sicoob Engecred, liderada pelo presidente Fabrício Modesto Cesar, esteve no maior congresso de cooperativismo de crédito do mundo. A comitiva reuniu oito representantes das áreas comercial, crédito, tecnologia, administrativa e compliance.","fonte":"Sicoob Engecred","url":"https://www.sicoobengecred.coop.br/blog/2026/08/28/sicoob-engecred-participa-do-16o-concred-em-goiania/","data":"2026-08-28"},{"cliente_id":"sicoob-cooplivre","editoria":"setor","titulo":"Sicoob marca presença no 16º Concred","resumo":"O congresso reuniu lideranças do sistema Sicoob em Goiânia, de 26 a 28/08, entre elas o diretor-presidente Marco Aurélio Almada.","fonte":"Sistema OCB/GO","url":"https://www.goiascooperativo.coop.br/sicoob-marca-presenca-no-16o-concred/","data":"2026-08-28"},{"cliente_id":"almeida-jr","editoria":"empresa","titulo":"Zara Home, Tânia Bulhões, Coco Bambu e mais: 59 marcas chegaram aos shoppings da Almeida Junior em 2026","resumo":"O grupo recebeu 59 novas marcas em seus shoppings de Santa Catarina ao longo de 2026.","fonte":"Vale Mais Notícia","url":"https://valemaisnoticia.com.br/2026/08/28/zara-home-tania-bulhoes-coco-bambu-e-mais-59-marcas-chegaram-aos-shoppings-da-almeida-junior-em-2026/","data":"2026-08-28"},{"cliente_id":"sebrae-nacional","editoria":"empresa","titulo":"Ainda dá tempo para renegociar as dívidas do pequeno negócio","resumo":"O prazo para aderir ao Novo Desenrola Brasil encerra na segunda-feira (31/08). O programa já renegociou quase R$ 36 bilhões em dívidas de Pronampe e Procred 360.","fonte":"ASN Nacional","url":"https://agenciasebrae.com.br/economia-e-politica/atencao-empreendedor-ainda-da-tempo-para-renegociar-as-dividas-do-pequeno-negocio/","data":"2026-08-28"},{"cliente_id":"sebrae-nacional","editoria":"setor","titulo":"Contratos públicos de inovação chegam a quase 300 no Brasil, aponta pesquisa","resumo":"O Observatório CPSI mapeou 293 Contratos Públicos para Solução Inovadora nos cinco anos do Marco Legal de Startups, com valor médio de R$ 807,7 mil. O gestor nacional do CatalisaGov, programa do Sebrae, participou da apresentação.","fonte":"ASN Nacional","url":"https://agenciasebrae.com.br/inovacao-e-tecnologia/contratos-publicos-de-inovacao-chegam-a-quase-300-no-brasil-aponta-pesquisa/","data":"2026-08-28"},{"cliente_id":"sebrae-nacional","editoria":"empresa","titulo":"Integração de negócios pode transformar dinâmica econômica das fronteiras","resumo":"Evento do Sebrae Nacional com o Sebrae/PR na trifronteira entre Barracão (PR), Dionísio Cerqueira (SC) e Bernardo de Irigoyen (Argentina) discutiu turismo, gastronomia e free shops. O debate foi como converter o fluxo diário de fronteira em negócios duradouros.","fonte":"ASN Nacional","url":"https://agenciasebrae.com.br/economia-e-politica/integracao-de-negocios-pode-transformar-dinamica-economica-das-fronteiras/","data":"2026-08-28"},{"cliente_id":"sebrae-nacional","editoria":"empresa","titulo":"Dante destaca educação financeira, empreendedorismo e cooperativismo na formação de jovens","resumo":"O ex-jogador de vôlei Dante Amaral participou de atividade do Sebrae no 16º Concred, em Goiânia. Ele relacionou disciplina e cooperação do esporte ao desenvolvimento empreendedor.","fonte":"ASN Nacional","url":"https://agenciasebrae.com.br/cultura-empreendedora/dante-destaca-educacao-financeira-empreendedorismo-e-cooperativismo-na-formacao-de-jovens/","data":"2026-08-28"},{"cliente_id":"sebrae-ba","editoria":"empresa","titulo":"Final estadual do Desafio Liga Jovem será realizada no dia 2 de setembro","resumo":"O Sebrae Bahia coordena a 4ª edição da competição nacional de empreendedorismo estudantil, com premiações de até R$ 600 mil.","fonte":"ASN Bahia","url":"https://ba.agenciasebrae.com.br/cultura-empreendedora/final-estadual-do-desafio-liga-jovem-sera-realizada-no-dia-2-de-setembro/","data":"2026-08-28"},{"cliente_id":"sebrae-ba","editoria":"empresa","titulo":"Meetup Summit 2026 coloca Juazeiro no centro do debate sobre inovação","resumo":"O Sebrae organizou o evento em parceria com a Secti no dia 27/08, reunindo cerca de 180 participantes no Vale do São Francisco. O tema central foi o papel da terra na nova economia global.","fonte":"ASN Bahia","url":"https://ba.agenciasebrae.com.br/cultura-empreendedora/meetup-summit-2026-aborda-terra-tecnologia-e-futuro-e-coloca-juazeiro-no-centro-do-debate-sobre-inovacao/","data":"2026-08-28"},{"cliente_id":"sebrae-ba","editoria":"setor","titulo":"1º Fórum de Pecuária da Bahia reúne setor produtivo no Oeste do estado","resumo":"O evento em Barreiras, com apoio do Sebrae, reuniu produtores e técnicos para debater produtividade, genética e mercado futuro da pecuária baiana.","fonte":"ASN Bahia","url":"https://ba.agenciasebrae.com.br/cultura-empreendedora/1o-forum-de-pecuaria-da-bahia-reune-setor-produtivo-e-aposta-no-conhecimento-para-fortalecer-o-oeste/","data":"2026-08-28"},{"cliente_id":"sebrae-mg","editoria":"empresa","titulo":"Festival de Inverno de Mantena fortalece pequenos negócios locais","resumo":"O Sebrae Minas promove a 6ª edição em 28 e 29/08, com circuito gastronômico e feira multissetorial gratuitos. A ação é feita com prefeitura, CDL, ACE e Sicoob Crediriodoce.","fonte":"ASN Minas Gerais","url":"https://mg.agenciasebrae.com.br/cultura-empreendedora/festival-de-inverno-de-mantena-fortalece-pequenos-negocios-locais/","data":"2026-08-28"},{"cliente_id":"sebrae-mg","editoria":"empresa","titulo":"Montes Claros inicia programa para transformar a cidade em destino turístico inteligente","resumo":"O Programa Check-in Turismo, com o Sebrae Minas, fará mapeamento da cadeia turística e consultorias presenciais por cerca de três meses.","fonte":"ASN Minas Gerais","url":"https://mg.agenciasebrae.com.br/economia-e-politica/montes-claros-inicia-programa-para-fortalecer-turismo-e-transformar-cidade-em-destino-turistico-inteligente/","data":"2026-08-28"}]},{"data":"2026-08-28","itens":[{"cliente_id":"cemig","editoria":"gente","titulo":"EXCLUSIVO: Cemig terá novo CEO depois de apenas três meses","resumo":"O governador de Minas indicará novo presidente executivo três meses após a posse de Alexandre Ramos, atendendo a aliados políticos em período eleitoral. Marcio Nunes, ex-presidente da Copasa, é o favorito; Fernando Fagundes, ex-diretor jurídico da Light, é o outro nome em avaliação.","fonte":"Brazil Journal","url":"https://braziljournal.com/exclusivo-cemig-tera-novo-ceo-depois-de-apenas-tres-meses/","data":"2026-08-26"},{"cliente_id":"taesa","editoria":"empresa","titulo":"Taesa paga dividendos e juros sobre capital próprio a acionistas","resumo":"A Taesa efetuou em 26/08 o pagamento de R$ 206,8 milhões em dividendos e JCP. Os valores foram aprovados após o resultado do segundo trimestre de 2026.","fonte":"Suno Notícias","url":"https://www.suno.com.br/noticias/a-taesa-taee11-agenda-dividendos-26082026-go/","data":"2026-08-26"},{"cliente_id":"sebrae-nacional","editoria":"empresa","titulo":"Parceria entre Sebrae e Startup World Cup abre caminho para startups brasileiras no mercado internacional","resumo":"A startup paulista Maria Educação venceu a seletiva regional no Startup Summit 2026 e representará o Brasil na final no Vale do Silício. A parceria amplia o acesso de empresas inovadoras brasileiras ao mercado internacional.","fonte":"Agência Sebrae de Notícias","url":"https://agenciasebrae.com.br/arquivo/parceria-entre-sebrae-e-startup-world-cup-abre-caminho-para-startups-brasileiras-no-mercado-internacional/","data":"2026-08-27"},{"cliente_id":"sebrae-nacional","editoria":"setor","titulo":"Fundo Germina chega a R$ 200 milhões ampliando o acesso de startups a investimentos","resumo":"O fundo atingiu R$ 200 milhões após novo aporte de R$ 100 milhões do Sebrae-SP, somado aos R$ 100 milhões do Sebrae Nacional aportados em outubro de 2025. O anúncio ocorreu no Startup Summit 2026, em Florianópolis.","fonte":"Agência Sebrae de Notícias","url":"https://agenciasebrae.com.br/inovacao-e-tecnologia/fundo-germina-chega-a-r-200-milhoes-ampliando-o-acesso-de-startups-brasileiras-a-investimentos/","data":"2026-08-27"},{"cliente_id":"sebrae-ba","editoria":"gente","titulo":"Sebrae Bahia abre processo seletivo com salários de até R$ 11.867,76","resumo":"Vagas de Analista Técnico I e II, jornada de 40 horas, com seleção em três fases — prova de conhecimentos, análise curricular e entrevista por competências. Inscrições até 5 de outubro.","fonte":"Fala Alagoinhas News","url":"https://www.falaalagoinhasnews.com.br/2026/08/sebrae-abre-selecao-na-bahia-com.html","data":"2026-08-27"},{"cliente_id":"sebrae-ba","editoria":"empresa","titulo":"Com apoio do Sebrae, startup de Vitória da Conquista transforma inovação em solução para o setor público","resumo":"A Digigov desenvolveu uma plataforma de CRM para modernizar a gestão pública e recebeu investimento de uma empresa de telecomunicações. A empresa planeja expandir a atuação em soluções de governo inteligente.","fonte":"ASN Bahia","url":"https://ba.agenciasebrae.com.br/cultura-empreendedora/com-apoio-do-sebrae-startup-de-vitoria-da-conquista-transforma-inovacao-em-solucao-para-o-setor-publico/","data":"2026-08-25"},{"cliente_id":"sebrae-mg","editoria":"empresa","titulo":"Sebrae Minas e Direcional realizam rodada de negócios para o setor de Casa e Construção","resumo":"O evento acontece em 12 de setembro, com 60 vagas para empresas do setor. Encerra o Programa de Encadeamento Produtivo, que capacita fornecedores desde abril de 2025.","fonte":"ASN Minas Gerais","url":"https://mg.agenciasebrae.com.br/cultura-empreendedora/sebrae-minas-e-direcional-realizam-rodada-de-negocios-para-pequenos-negocios-do-setor-de-casa-e-construcao/","data":"2026-08-27"},{"cliente_id":"sebrae-mg","editoria":"empresa","titulo":"Sebrae Minas abre inscrições para seminário com metodologia da ONU em Araxá","resumo":"O seminário de empreendedorismo integra uma série que o Sebrae Minas vem levando a municípios do estado.","fonte":"ASN Minas Gerais","url":"https://mg.agenciasebrae.com.br/cultura-empreendedora/sebrae-minas-abre-inscricoes-para-seminario-com-metodologia-da-onu-em-araxa/","data":"2026-08-26"},{"cliente_id":"sebrae-mt-cultura","editoria":"empresa","titulo":"Instituições se unem para oferecer serviços gratuitos à população de Rondonópolis","resumo":"O evento “Fasipe em Ação” reuniu instituições com serviços de saúde, orientação jurídica e apoio ao empreendedorismo. O Sebrae/MT participou com o Programa Inclusão Produtiva.","fonte":"ASN Mato Grosso","url":"https://mt.agenciasebrae.com.br/cultura-empreendedora/instituicoes-se-unem-para-oferecer-servicos-gratuitos-a-populacao-de-rondonopolis/","data":"2026-08-27"},{"cliente_id":"sebrae-mt-cultura","editoria":"empresa","titulo":"Professora de Paranaíta está entre as dez finalistas do Programa Escalada Sebrae 2026","resumo":"Rejane Martins de Oliveira Pereira foi reconhecida por práticas inovadoras de educação empreendedora em sala de aula. Ela receberá R$ 10 mil pela iniciativa.","fonte":"ASN Mato Grosso","url":"https://mt.agenciasebrae.com.br/cultura-empreendedora/professora-de-paranaita-esta-entre-as-top-10-do-programa-escalada-sebrae-2026/","data":"2026-08-27"},{"cliente_id":"sebrae-pa","editoria":"empresa","titulo":"Sebrae no Pará participa do Startup Summit 2026, em Santa Catarina","resumo":"O Sebrae Pará levou empreendedores paraenses ao evento nacional de inovação para ampliar conexões com investidores e mercado.","fonte":"ASN Pará","url":"https://pa.agenciasebrae.com.br/inovacao-e-tecnologia/sebrae-no-para-participa-do-startup-summit-2026-em-santa-catarina/","data":"2026-08-27"},{"cliente_id":"sebrae-pa","editoria":"empresa","titulo":"Sebrae e prefeitura de Belém entregam primeira Sala do Empreendedor de Mosqueiro","resumo":"A unidade amplia o atendimento a pequenos negócios do distrito.","fonte":"ASN Pará","url":"https://pa.agenciasebrae.com.br/economia-e-politica/sebrae-e-prefeitura-de-belem-entregam-primeira-sala-do-empreendedor-de-mosqueiro/","data":"2026-08-26"},{"cliente_id":"sebrae-pa","editoria":"empresa","titulo":"Inova Xingu reúne jovens e empreendedores em Altamira","resumo":"O programa reuniu participantes para transformar desafios socioambientais em ideias de negócio.","fonte":"ASN Pará","url":"https://pa.agenciasebrae.com.br/inovacao-e-tecnologia/inova-xingu-reune-jovens-e-empreendedores-para-transformar-desafios-socioambientais-em-ideias-de-negocio/","data":"2026-08-25"},{"cliente_id":"sebrae-rr","editoria":"empresa","titulo":"Prêmio Sebrae Mulher de Negócios: o que está por trás da escolha das vencedoras","resumo":"O Sebrae Roraima detalhou os critérios de avaliação — gestão, trajetória e inovação — antes da etapa estadual de 27 de agosto.","fonte":"ASN Roraima","url":"https://rr.agenciasebrae.com.br/cultura-empreendedora/premio-sebrae-mulher-de-negocios-o-que-esta-por-tras-da-escolha-das-vencedoras/","data":"2026-08-26"},{"cliente_id":"sebrae-rr","editoria":"empresa","titulo":"Sebrae Roraima capacita servidores municipais em gestão e fiscalização de contratos","resumo":"A capacitação foi voltada a servidores municipais responsáveis por contratos públicos.","fonte":"ASN Roraima","url":"https://rr.agenciasebrae.com.br/economia-e-politica/sebrae-roraima-capacita-servidores-municipais-em-gestao-e-fiscalizacao-de-contratos/","data":"2026-08-26"},{"cliente_id":"sebrae-se","editoria":"empresa","titulo":"Sebrae desenvolverá projeto para qualificar profissionais do turismo","resumo":"O projeto “Sergipe, esse é o Destino” é lançado em 28/08, em parceria com o Ministério do Turismo. Vai qualificar cerca de 400 profissionais em oito municípios.","fonte":"ASN Sergipe","url":"https://se.agenciasebrae.com.br/cultura-empreendedora/sebrae-desenvolvera-projeto-para-qualificar-profissionais-do-turismo/","data":"2026-08-27"},{"cliente_id":"sesc-df","editoria":"empresa","titulo":"Sesc-DF inaugura novo Centro de Saúde no Setor Comercial Sul","resumo":"A unidade oferece serviços odontológicos e de atividade física, e homenageia Rogério Tokarski.","fonte":"Sesc DF","url":"https://sescdf.com.br/w/sesc-df-inaugura-novo-centro-de-sa%C3%BAde-no-setor-comercial-sul-e-homenageia-rog%C3%A9rio-tokarski/-/categories/288462","data":"2026-08-27"},{"cliente_id":"sesc-df","editoria":"empresa","titulo":"Sesc DF divulga relação de inscritos do Embarque na Inclusão 2026","resumo":"O programa de turismo social é voltado à inclusão social por meio do turismo.","fonte":"Sesc DF","url":"https://sescdf.com.br/w/turismo-social-sesc-df-confira-a-rela%C3%A7%C3%A3o-de-inscritos-do-embarque-na-inclus%C3%A3o-2026/-/categories/417548","data":"2026-08-27"},{"cliente_id":"sescoop-mt","editoria":"empresa","titulo":"Sistema OCB/MT participa de seminário sobre recuperação judicial em Cuiabá","resumo":"O tema é sensível para a proteção de créditos das cooperativas mato-grossenses.","fonte":"Sistema OCB/MT","url":"https://sistemaocbmt.coop.br/noticias/sistema-ocb-mt-participa-de-seminario-sobre-recuperacao-judicial-em-cuiaba","data":"2026-08-27"},{"cliente_id":"caixa-vida","editoria":"setor","titulo":"Susep diz que mercado privado não poderá assumir sozinho os riscos das mudanças climáticas","resumo":"O superintendente Alessandro Octaviani defendeu uma solução coletiva envolvendo seguradoras, resseguradoras, governo e mercado de capitais.","fonte":"Sonho Seguro","url":"https://www.sonhoseguro.com.br/2026/08/susep-mercado-privado-nao-podera-assumir-sozinho-os-riscos-das-mudancas-climaticas/","data":"2026-08-26"},{"cliente_id":"engecred","editoria":"setor","titulo":"Sicredi supera R$ 500 bilhões em ativos e alcança 10,5 milhões de associados","resumo":"O número de associados quase dobrou em cinco anos. O sistema cooperativo de crédito brasileiro já soma mais de R$ 1 trilhão em ativos totais.","fonte":"Universo Cooperativo","url":"https://universocooperativo5.wordpress.com/2026/08/26/sicredi-supera-r-500-bilhoes-em-ativos-e-alcanca-mais-de-105-milhoes/","data":"2026-08-26"},{"cliente_id":"tigre","editoria":"setor","titulo":"Confiança da Construção cai 0,6 ponto em agosto, a 91,9 pontos, aponta a FGV","resumo":"A média trimestral ficou em 92,0 pontos, mas o Nível de Utilização da Capacidade Instalada subiu para 78,8%.","fonte":"Diário do Grande ABC","url":"https://www.dgabc.com.br/Noticia/4343310/confianca-da-construcao-cai-0-6-ponto-em-agosto-a-91-9-pontos-afirma-fgv","data":"2026-08-26"}]}]}/*FIM*/</script>
+
+<script>
+(function(){
+"use strict";
+var PRISTINE = "<!doctype html>\n" + document.documentElement.outerHTML;
+
+var ED = {
+  empresa:{rot:"Empresa", cls:"e-empresa"},
+  setor:  {rot:"Setor",   cls:"e-setor"},
+  gente:  {rot:"Gente & Cultura", cls:"e-gente"},
+  risco:  {rot:"Alerta",  cls:"e-risco"}
+};
+var ORD = ["risco","empresa","gente","setor"];
+
+var estado, artifact = null, podePublicar = false, filtro = null, arqIdx = 0, sujo = false;
+
+try { estado = JSON.parse(document.getElementById("dados").textContent.replace(/^\/\*DADOS\*\//,"").replace(/\/\*FIM\*\/$/,"")); }
+catch(e){ estado = {versao:1, clientes:[], edicoes:[]}; }
+estado.clientes = estado.clientes || [];
+estado.edicoes  = estado.edicoes  || [];
+
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, function(c){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+function el(id){ return document.getElementById(id); }
+function toast(msg){ var t=el("toast"); t.textContent=msg; t.classList.add("on");
+  clearTimeout(t._h); t._h=setTimeout(function(){t.classList.remove("on");},3000); }
+function cliente(id){ for(var i=0;i<estado.clientes.length;i++) if(estado.clientes[i].id===id) return estado.clientes[i]; return null; }
+function dataLonga(iso){
+  if(!iso) return "—";
+  var p=iso.split("-"), d=new Date(+p[0], +p[1]-1, +p[2]);
+  var dias=["domingo","segunda-feira","terça-feira","quarta-feira","quinta-feira","sexta-feira","sábado"];
+  var mes=["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
+  return dias[d.getDay()]+", "+d.getDate()+" de "+mes[d.getMonth()]+" de "+d.getFullYear();
+}
+function br(iso){ return iso ? iso.split("-").reverse().join("/") : ""; }
+
+/* ---------- JORNAL ---------- */
+function renderJornal(){
+  var ed = estado.edicoes[arqIdx] || null, alvo = el("p-jornal");
+  var itens = ed && ed.itens ? ed.itens : [];
+  var cont = {empresa:0,setor:0,gente:0,risco:0}, porCliente = {};
+  itens.forEach(function(it){
+    if(cont[it.editoria]===undefined) it.editoria = "empresa";
+    cont[it.editoria]++;
+    (porCliente[it.cliente_id] = porCliente[it.cliente_id]||[]).push(it);
+  });
+  var ativos = estado.clientes.filter(function(c){ return c.ativo!==false; });
+  var comMov = Object.keys(porCliente).length;
+
+  var h = '<div class="card">'+
+    '<div class="ed-topo"><h1 style="margin:0">Pauta do dia</h1>'+
+    '<span class="ed-data">'+(ed ? esc(dataLonga(ed.data)) : "aguardando primeira coleta")+'</span></div>'+
+    '<div class="qgrid">'+
+      '<div class="stat"><b>'+itens.length+'</b><span>notícias</span></div>'+
+      '<div class="stat"><b>'+comMov+'<i>/'+ativos.length+'</i></b><span>clientes na pauta</span></div>'+
+      '<div class="stat s-risco"><b>'+cont.risco+'</b><span>alertas</span></div>'+
+      '<div class="stat s-gente"><b>'+cont.gente+'</b><span>gente &amp; cultura</span></div>'+
+    '</div></div>';
+
+  if(!ed){
+    h += '<div class="card vazio"><strong>Nenhuma edição publicada ainda</strong>A primeira coleta roda às 07:30. Enquanto isso, revise a carteira na aba Clientes.</div>';
+    alvo.innerHTML = h; return;
+  }
+
+  h += '<h2><span class="t">Notícias da carteira</span></h2>';
+  h += '<div class="filtros">'+
+       '<button class="chip" data-f="" aria-pressed="'+(filtro===null)+'">Tudo<span class="n">'+itens.length+'</span></button>';
+  ORD.forEach(function(k){
+    if(!cont[k]) return;
+    h += '<button class="chip" data-f="'+k+'" aria-pressed="'+(filtro===k)+'">'+ED[k].rot+'<span class="n">'+cont[k]+'</span></button>';
+  });
+  h += '</div>';
+
+  if(!itens.length){
+    h += '<div class="card vazio"><strong>Dia silencioso</strong>Nenhuma menção relevante à carteira nas últimas 24 horas.</div>';
+  } else {
+    var ordem = estado.clientes.filter(function(c){ return porCliente[c.id]; });
+    ordem.sort(function(a,b){
+      var ra = porCliente[a.id].some(function(i){return i.editoria==="risco";}) ? 0 : 1;
+      var rb = porCliente[b.id].some(function(i){return i.editoria==="risco";}) ? 0 : 1;
+      if(ra!==rb) return ra-rb;
+      return porCliente[b.id].length - porCliente[a.id].length;
+    });
+    var algum = false, corpo = "";
+    ordem.forEach(function(c){
+      var lista = porCliente[c.id].filter(function(i){ return !filtro || i.editoria===filtro; });
+      if(!lista.length) return;
+      algum = true;
+      lista.sort(function(a,b){ return ORD.indexOf(a.editoria)-ORD.indexOf(b.editoria); });
+      corpo += '<section class="bloco"><div class="bloco-head"><h3>'+esc(c.nome)+'</h3>'+
+           '<span class="bloco-meta">'+esc(c.setor||"")+(c.uf?' · <span class="uf">'+esc(c.uf)+'</span>':'')+'</span></div>';
+      lista.forEach(function(it){
+        var e = ED[it.editoria] || ED.empresa;
+        corpo += '<article class="item '+e.cls+'">'+
+             '<div class="item-top"><span class="ed">'+e.rot+'</span>'+
+             (it.fonte?'<span class="fonte">'+esc(it.fonte)+(it.data&&it.data!==ed.data?' · '+esc(br(it.data)):'')+'</span>':'')+'</div>'+
+             '<h4>'+(it.url?'<a href="'+esc(it.url)+'" target="_blank" rel="noopener noreferrer">'+esc(it.titulo)+'</a>':esc(it.titulo))+'</h4>'+
+             (it.resumo?'<p>'+esc(it.resumo)+'</p>':'')+
+             '</article>';
+      });
+      corpo += '</section>';
+    });
+    h += algum ? '<div class="colunas">'+corpo+'</div>'
+               : '<div class="card vazio"><strong>Nada neste filtro</strong>Escolha outra editoria acima.</div>';
+  }
+
+  var mudos = ativos.filter(function(c){ return !porCliente[c.id]; });
+  if(mudos.length){
+    h += '<div class="card silencio"><div class="rot">Sem movimento hoje — '+mudos.length+' cliente'+(mudos.length===1?'':'s')+'</div><div class="silencio-lista">';
+    mudos.forEach(function(c){ h += '<span class="mudo">'+esc(c.nome)+'</span>'; });
+    h += '</div></div>';
+  }
+  alvo.innerHTML = h;
+  Array.prototype.forEach.call(alvo.querySelectorAll(".chip"), function(b){
+    b.addEventListener("click", function(){ filtro = b.dataset.f || null; renderJornal(); });
+  });
+}
+
+/* ---------- PORTÃO ADMIN ---------- */
+/* Isto ESCONDE a área de edição de quem só quer ler o jornal. Não é segurança:
+   a página é estática e o código é visível. A proteção real é o compartilhamento
+   em modo leitura, em que o próprio servidor recusa a gravação. */
+var destravado = false;
+try { destravado = sessionStorage.getItem("pauta-admin") === "1"; } catch(e){}
+
+function digest(usuario, senha){
+  var a = estado.auth || {};
+  var txt = (a.salt||"") + "|" + usuario + "|" + senha;
+  if(!(window.crypto && window.crypto.subtle)) return Promise.resolve(null);
+  return window.crypto.subtle.digest("SHA-256", new TextEncoder().encode(txt)).then(function(buf){
+    return Array.prototype.map.call(new Uint8Array(buf), function(b){
+      return ("0"+b.toString(16)).slice(-2); }).join("");
+  });
+}
+
+function renderPortao(msg){
+  el("p-clientes").innerHTML =
+    '<h2><span class="t">Área restrita</span></h2>'+
+    '<div class="portao">'+
+      '<div class="cad"><svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"></rect>'+
+      '<path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg></div>'+
+      '<h3>Carteira de clientes</h3>'+
+      '<span class="small">Só quem administra a carteira edita esta lista. O jornal continua aberto a todos.</span>'+
+      (msg ? '<div class="erro-login">'+esc(msg)+'</div>' : '')+
+      '<form id="frmLogin">'+
+        '<div class="field"><label for="l-user">Usuário</label>'+
+          '<input id="l-user" type="text" autocomplete="username" required></div>'+
+        '<div class="field"><label for="l-pass">Senha</label>'+
+          '<input id="l-pass" type="password" autocomplete="current-password" required></div>'+
+        '<button class="btn" type="submit">Entrar</button>'+
+      '</form>'+
+    '</div>';
+  el("frmLogin").addEventListener("submit", function(ev){
+    ev.preventDefault();
+    var u = el("l-user").value.trim(), s = el("l-pass").value;
+    var a = estado.auth || {};
+    digest(u, s).then(function(hx){
+      if(hx === null){ renderPortao("Este navegador não suporta a verificação. Abra em outro navegador."); return; }
+      if(u === a.usuario && hx === a.hash){
+        destravado = true;
+        try { sessionStorage.setItem("pauta-admin","1"); } catch(e){}
+        renderClientes();
+      } else {
+        renderPortao("Usuário ou senha incorretos.");
+      }
+    });
+  });
+  el("l-user").focus();
+}
+
+function sair(){
+  destravado = false;
+  try { sessionStorage.removeItem("pauta-admin"); } catch(e){}
+  renderPortao();
+}
+
+/* ---------- CLIENTES ---------- */
+function renderClientes(){
+  if(!destravado){ renderPortao(); return; }
+  var alvo = el("p-clientes"), q = (alvo._q||"").toLowerCase();
+  var pend = estado.clientes.filter(function(c){ return c.revisar; }).length;
+  var h = '<h2><span class="t">Carteira de clientes</span></h2>';
+
+  if(!podePublicar) h += '<div class="hint">Modo leitura: você está vendo uma cópia compartilhada, ou o editor ainda está carregando. As alterações não serão salvas.</div>';
+  if(pend) h += '<div class="warn"><strong>'+pend+' cliente'+(pend===1?'':'s')+' aguardando sua confirmação.</strong> Estão marcados com <span class="flag">revisar</span> — o nome é ambíguo demais para buscar sozinho. Corrija a razão social e a busca, senão o clipping vem com ruído ou vazio.</div>';
+
+  h += '<div class="barra">'+
+       '<input class="busca" id="fClientes" type="search" placeholder="Filtrar clientes…" value="'+esc(alvo._q||"")+'">'+
+       '<button class="btn-ghost btn-sm" id="btAdd">+ Cliente</button>'+
+       '<button class="btn btn-sm" id="btSalvar" '+(podePublicar?"":"disabled")+'>Salvar carteira</button>'+
+       '</div>';
+
+  h += '<div class="tbl-wrap"><table><thead><tr>'+
+       '<th>Cliente</th><th>Razão social</th><th>Setor</th><th>UF</th><th>Busca</th><th>Excluir</th><th></th>'+
+       '</tr></thead><tbody>';
+  var vis = estado.clientes.filter(function(c){
+    if(!q) return true;
+    return (c.nome+" "+(c.razao||"")+" "+(c.setor||"")+" "+(c.uf||"")).toLowerCase().indexOf(q) > -1;
+  });
+  if(!vis.length) h += '<tr><td colspan="7" style="color:var(--mut);padding:28px 14px">Nenhum cliente corresponde a esse filtro.</td></tr>';
+  vis.forEach(function(c){
+    h += '<tr class="'+(c.ativo===false?"off":"")+'">'+
+      '<td class="c-nome">'+esc(c.nome)+(c.revisar?'<span class="flag" title="'+esc(c.revisar)+'">revisar</span>':'')+'</td>'+
+      '<td>'+esc(c.razao||"—")+'</td><td>'+esc(c.setor||"—")+'</td>'+
+      '<td class="c-uf">'+esc(c.uf||"—")+'</td>'+
+      '<td class="c-q">'+esc(c.query||"—")+'</td>'+
+      '<td class="c-q">'+esc((c.excluir||[]).join(", ")||"—")+'</td>'+
+      '<td class="acoes">'+
+        '<button class="lnk" data-ed="'+esc(c.id)+'">editar</button>'+
+        '<button class="lnk" data-tg="'+esc(c.id)+'">'+(c.ativo===false?"ativar":"pausar")+'</button>'+
+        '<button class="lnk del" data-rm="'+esc(c.id)+'">remover</button>'+
+      '</td></tr>';
+  });
+  h += '</tbody></table></div>'+
+       '<p class="small" style="margin-top:14px;max-width:74ch">A rotina das 07:30 lê exatamente esta carteira. '+
+       'Pausar mantém o cliente no cadastro mas fora da busca. Depois de editar, clique em <strong>Salvar carteira</strong> — só então a mudança vale para a próxima edição.</p>'+
+       '<div class="sessao">Sessão de administrador aberta neste navegador.'+
+       '<button class="lnk" id="btSenha">trocar senha</button>'+
+       '<button class="lnk" id="btSair">sair</button></div>';
+  alvo.innerHTML = h;
+  el("btSair").addEventListener("click", sair);
+  el("btSenha").addEventListener("click", function(){
+    if(!podePublicar){ toast("Modo leitura: a senha não pode ser trocada nesta cópia."); return; }
+    var d = el("dlgSenha"); el("s-atual").value = ""; el("s-nova").value = ""; el("s-erro").hidden = true;
+    d.returnValue = ""; d.showModal(); el("s-atual").focus();
+  });
+
+  el("fClientes").addEventListener("input", function(e){
+    alvo._q = e.target.value; renderClientes();
+    var f = el("fClientes"); f.focus(); f.setSelectionRange(f.value.length, f.value.length);
+  });
+  el("btAdd").addEventListener("click", function(){ abrirForm(null); });
+  var bs = el("btSalvar"); if(bs) bs.addEventListener("click", salvar);
+  if(sujo && bs && podePublicar) bs.textContent = "Salvar carteira •";
+  Array.prototype.forEach.call(alvo.querySelectorAll("[data-ed]"), function(b){
+    b.addEventListener("click", function(){ abrirForm(b.dataset.ed); }); });
+  Array.prototype.forEach.call(alvo.querySelectorAll("[data-tg]"), function(b){
+    b.addEventListener("click", function(){ var c = cliente(b.dataset.tg); c.ativo = (c.ativo===false); sujo=true; renderClientes(); }); });
+  Array.prototype.forEach.call(alvo.querySelectorAll("[data-rm]"), function(b){
+    b.addEventListener("click", function(){
+      var c = cliente(b.dataset.rm); if(!c) return;
+      estado.clientes = estado.clientes.filter(function(x){ return x.id!==c.id; });
+      sujo = true; renderClientes(); toast("“"+c.nome+"” removido — clique em Salvar carteira para confirmar.");
+    }); });
+}
+
+function slug(s){
+  return String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"")
+    .replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,40) || ("c"+Date.now());
+}
+
+function abrirForm(id){
+  var c = id ? cliente(id) : null, dlg = el("dlg"), f = el("frm");
+  el("dlgTitulo").textContent = c ? "Editar " + c.nome : "Novo cliente";
+  f.nome.value = c ? c.nome : "";
+  f.razao.value = c ? (c.razao||"") : "";
+  f.setor.value = c ? (c.setor||"") : "";
+  f.uf.value = c ? (c.uf||"") : "";
+  f.site.value = c ? (c.site||"") : "";
+  f.query.value = c ? (c.query||"") : "";
+  f.excluir.value = c ? (c.excluir||[]).join(", ") : "";
+  f.ativo.checked = c ? c.ativo!==false : true;
+  dlg._id = id; dlg.returnValue = ""; dlg.showModal();
+}
+
+el("dlg").addEventListener("close", function(){
+  var dlg = el("dlg"); if(dlg.returnValue !== "ok") return;
+  var f = el("frm"), nome = f.nome.value.trim();
+  if(!nome) return;
+  var d = {
+    nome: nome, razao: f.razao.value.trim(), setor: f.setor.value.trim(),
+    uf: f.uf.value.trim().toUpperCase(), site: f.site.value.trim(),
+    query: f.query.value.trim() || ('"' + nome + '"'),
+    excluir: f.excluir.value.split(",").map(function(s){ return s.trim(); }).filter(Boolean),
+    ativo: f.ativo.checked
+  };
+  var c = dlg._id ? cliente(dlg._id) : null;
+  if(c){ for(var k in d) c[k] = d[k]; c.revisar = ""; }
+  else {
+    d.id = slug(nome); d.revisar = "";
+    if(cliente(d.id)) d.id += "-" + String(Date.now()).slice(-4);
+    estado.clientes.push(d);
+  }
+  sujo = true; renderClientes();
+});
+
+el("dlgSenha").addEventListener("close", function(){
+  var d = el("dlgSenha"); if(d.returnValue !== "ok") return;
+  var atual = el("s-atual").value, nova = el("s-nova").value;
+  var a = estado.auth || {};
+  digest(a.usuario, atual).then(function(hx){
+    if(hx !== a.hash){ el("s-erro").hidden = false; d.returnValue=""; d.showModal(); return; }
+    return digest(a.usuario, nova).then(function(hn){
+      estado.auth.hash = hn;
+      salvar("Senha trocada. A anterior não vale mais.");
+    });
+  });
+});
+
+/* ---------- ÚLTIMOS 15 DIAS ---------- */
+var qFiltro = null;
+
+function renderQuinzena(){
+  var alvo = el("p-quinzena");
+  var hoje = estado.edicoes.length ? estado.edicoes[0].data : null;
+  var limite = null;
+  if(hoje){ var d = new Date(hoje + "T12:00:00"); d.setDate(d.getDate()-14);
+    limite = d.toISOString().slice(0,10); }
+
+  var vistos = {}, porCliente = {}, cont = {empresa:0,setor:0,gente:0,risco:0}, total = 0, dias = {};
+  estado.edicoes.forEach(function(ed){
+    if(limite && ed.data < limite) return;
+    (ed.itens||[]).forEach(function(it){
+      var chave = it.url || (it.cliente_id + "|" + it.titulo);
+      if(vistos[chave]) return;
+      vistos[chave] = 1;
+      var copia = {}; for(var k in it) copia[k] = it[k];
+      if(!copia.data) copia.data = ed.data;
+      (porCliente[it.cliente_id] = porCliente[it.cliente_id]||[]).push(copia);
+      if(cont[copia.editoria]===undefined) copia.editoria = "empresa";
+      cont[copia.editoria]++; total++; dias[ed.data] = 1;
+    });
+  });
+  var ativos = estado.clientes.filter(function(c){ return c.ativo!==false; });
+  var comMov = Object.keys(porCliente).length;
+  var nDias = Object.keys(dias).length;
+
+  var h = '<div class="card">'+
+    '<div class="ed-topo"><h1 style="margin:0">Últimos 15 dias</h1>'+
+    '<span class="ed-data">'+(limite ? esc(br(limite))+' a '+esc(br(hoje)) : "sem edições")+'</span></div>'+
+    '<div class="qgrid">'+
+      '<div class="stat"><b>'+total+'</b><span>notícias no período</span></div>'+
+      '<div class="stat"><b>'+comMov+'<i>/'+ativos.length+'</i></b><span>clientes com movimento</span></div>'+
+      '<div class="stat s-risco"><b>'+cont.risco+'</b><span>alertas</span></div>'+
+      '<div class="stat s-gente"><b>'+cont.gente+'</b><span>gente &amp; cultura</span></div>'+
+    '</div></div>';
+
+  if(!total){
+    h += '<div class="card vazio"><strong>Ainda sem histórico</strong>'+
+         (nDias<2 ? 'O acumulado ganha sentido depois de alguns dias de coleta.' : 'Nenhuma menção à carteira no período.')+'</div>';
+    alvo.innerHTML = h; return;
+  }
+
+  h += '<h2><span class="t">Acumulado por cliente</span></h2>';
+  h += '<div class="filtros">'+
+       '<button class="chip" data-q="" aria-pressed="'+(qFiltro===null)+'">Tudo<span class="n">'+total+'</span></button>';
+  ORD.forEach(function(k){
+    if(!cont[k]) return;
+    h += '<button class="chip" data-q="'+k+'" aria-pressed="'+(qFiltro===k)+'">'+ED[k].rot+'<span class="n">'+cont[k]+'</span></button>';
+  });
+  h += '</div>';
+
+  var ordem = estado.clientes.filter(function(c){ return porCliente[c.id]; });
+  ordem.sort(function(a,b){
+    var ra = porCliente[a.id].some(function(i){return i.editoria==="risco";}) ? 0 : 1;
+    var rb = porCliente[b.id].some(function(i){return i.editoria==="risco";}) ? 0 : 1;
+    if(ra!==rb) return ra-rb;
+    return porCliente[b.id].length - porCliente[a.id].length;
+  });
+
+  var corpo = "", algum = false;
+  ordem.forEach(function(c){
+    var lista = porCliente[c.id].filter(function(i){ return !qFiltro || i.editoria===qFiltro; });
+    if(!lista.length) return;
+    algum = true;
+    lista.sort(function(a,b){ return a.data < b.data ? 1 : a.data > b.data ? -1 : 0; });
+    corpo += '<section class="bloco"><div class="bloco-head"><h3>'+esc(c.nome)+'</h3>'+
+             '<span class="bloco-meta">'+esc(c.setor||"")+(c.uf?' · <span class="uf">'+esc(c.uf)+'</span>':'')+
+             ' · '+lista.length+' notícia'+(lista.length===1?'':'s')+'</span></div>';
+    lista.forEach(function(it){
+      var e = ED[it.editoria] || ED.empresa;
+      corpo += '<article class="item '+e.cls+'">'+
+        '<div class="item-top"><span class="ed">'+e.rot+'</span>'+
+        '<span class="fonte">'+esc(br(it.data))+(it.fonte?' · '+esc(it.fonte):'')+'</span></div>'+
+        '<h4>'+(it.url?'<a href="'+esc(it.url)+'" target="_blank" rel="noopener noreferrer">'+esc(it.titulo)+'</a>':esc(it.titulo))+'</h4>'+
+        (it.resumo?'<p>'+esc(it.resumo)+'</p>':'')+
+        '</article>';
+    });
+    corpo += '</section>';
+  });
+  h += algum ? '<div class="colunas">'+corpo+'</div>'
+             : '<div class="card vazio"><strong>Nada neste filtro</strong>Escolha outra editoria acima.</div>';
+
+  var mudos = ativos.filter(function(c){ return !porCliente[c.id]; });
+  if(mudos.length){
+    h += '<div class="card silencio"><div class="rot">Sem nenhuma menção em 15 dias — '+mudos.length+' cliente'+(mudos.length===1?'':'s')+'</div><div class="silencio-lista">';
+    mudos.forEach(function(c){ h += '<span class="mudo">'+esc(c.nome)+'</span>'; });
+    h += '</div></div>';
+  }
+  alvo.innerHTML = h;
+  Array.prototype.forEach.call(alvo.querySelectorAll(".chip"), function(b){
+    b.addEventListener("click", function(){ qFiltro = b.dataset.q || null; renderQuinzena(); });
+  });
+}
+
+/* ---------- ARQUIVO ---------- */
+function renderArquivo(){
+  var h = '<h2><span class="t">Edições anteriores</span></h2>';
+  if(estado.edicoes.length < 2){
+    h += '<div class="card vazio"><strong>Arquivo vazio</strong>As edições passadas aparecem aqui a partir da segunda coleta.</div>';
+  } else {
+    h += '<div class="arq">';
+    estado.edicoes.forEach(function(e,i){
+      var n = (e.itens||[]).length;
+      var r = (e.itens||[]).filter(function(x){ return x.editoria==="risco"; }).length;
+      h += '<button class="arq-item" data-i="'+i+'">'+
+           '<span class="arq-d">'+esc(br(e.data))+(i===arqIdx?' · em exibição':'')+'</span>'+
+           '<span class="arq-n">'+n+' notícia'+(n===1?'':'s')+(r?' · '+r+' alerta'+(r===1?'':'s'):'')+'</span></button>';
+    });
+    h += '</div>';
+  }
+  el("p-arquivo").innerHTML = h;
+  Array.prototype.forEach.call(el("p-arquivo").querySelectorAll(".arq-item"), function(b){
+    b.addEventListener("click", function(){
+      arqIdx = +b.dataset.i; filtro = null; renderJornal(); renderArquivo(); irPara("jornal");
+    });
+  });
+}
+
+/* ---------- NAVEGAÇÃO ---------- */
+function irPara(p){
+  ["jornal","quinzena","clientes","arquivo"].forEach(function(k){
+    el("tab-"+k).setAttribute("aria-selected", String(k===p));
+    el("p-"+k).hidden = (k!==p);
+  });
+  if(p==="clientes") renderClientes();
+  if(p==="quinzena") renderQuinzena();
+  if(p==="arquivo") renderArquivo();
+  window.scrollTo(0,0);
+}
+Array.prototype.forEach.call(document.querySelectorAll(".topbar nav button"), function(t){
+  t.addEventListener("click", function(){ irPara(t.dataset.p); });
+});
+
+/* ---------- PUBLICAÇÃO ---------- */
+function serializar(){
+  var json = JSON.stringify(estado, null, 1).replace(/<\/script/gi, "<\\/script");
+  return PRISTINE.replace(
+    /(<script type="application\/json" id="dados">)[\s\S]*?(<\/script>)/,
+    function(m, a, b){ return a + "/*DADOS*/" + json + "/*FIM*/" + b; }
+  );
+}
+
+function salvar(msgOk){
+  if(!artifact){ toast("Editor indisponível — recarregue a página."); return; }
+  var b = el("btSalvar");
+  if(b){ b.disabled = true; b.textContent = "Salvando…"; }
+  artifact.publish(serializar()).then(function(){
+    sujo = false; toast(typeof msgOk === "string" ? msgOk : "Carteira salva. A coleta de amanhã já usa esta versão.");
+  })["catch"](function(err){
+    var c = err && err.code;
+    if(c === "conflict"){ toast("Outra pessoa salvou primeiro — a página vai recarregar com a versão dela."); return; }
+    if(c === "not_granted" || c === "not_writer"){ podePublicar = false; renderClientes(); toast("Você não tem permissão de edição nesta cópia."); return; }
+    if(b){ b.disabled = false; b.textContent = "Salvar carteira"; }
+    toast("Não foi possível salvar. Tente de novo em alguns segundos.");
+  });
+}
+
+window.addEventListener("beforeunload", function(e){ if(sujo){ e.preventDefault(); e.returnValue = ""; } });
+
+/* ---------- BOOT ---------- */
+renderJornal();
+el("carimbo").textContent = estado.atualizado_em
+  ? "Última coleta " + new Date(estado.atualizado_em).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"})
+  : "Aguardando a primeira coleta";
+
+if(window.claude && typeof window.claude.use === "function"){
+  window.claude.use("artifact").then(function(a){
+    artifact = a; podePublicar = !!a;
+    if(!el("p-clientes").hidden) renderClientes();
+  })["catch"](function(){ podePublicar = false; });
+}
+})();
+</script>
+</body>
+</html>
