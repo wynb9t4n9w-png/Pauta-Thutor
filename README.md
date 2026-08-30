@@ -20,7 +20,7 @@ para lá.
 
 ## A rotina diária
 
-Uma tarefa agendada roda todo dia às 07:30 (horário de São Paulo) e:
+Uma tarefa agendada roda todo dia às 06:30 (horário de São Paulo) e:
 
 1. lê o estado atual do artifact;
 2. busca notícias dos clientes ativos das últimas 24–48 h;
@@ -31,6 +31,28 @@ Uma tarefa agendada roda todo dia às 07:30 (horário de São Paulo) e:
 
 O GitHub Pages serve `docs/` e atualiza sozinho a cada commit. O endereço
 público nunca muda, então basta compartilhá-lo uma vez.
+
+Às 07:15 uma segunda rotina confere se a página ficou mesmo igual ao artifact
+e repara se não ficou. Os dois horários existem para que o jornal esteja
+pronto antes das 07:30, que é quando os leitores chegam.
+
+### Limitação conhecida: push a partir de rotinas
+
+Sessões criadas por rotina não conseguem escrever neste repositório:
+
+```
+access denied by the git proxy: wynb9t4n9w-png/Pauta-Thutor is not in
+this session's authorized repository set — HTTP 403
+```
+
+Leitura (`clone`, `fetch`) funciona; escrita não. A causa é o repositório não
+constar nas *fontes autorizadas* da sessão, e isso se define no nascimento da
+sessão — mexer no ambiente depois não retroalimenta sessões já criadas. A
+tentativa de contornar de dentro (`add_repo` com `access="push"`) é barrada
+antes de chegar ao backend.
+
+Enquanto isso não for resolvido na configuração do ambiente, o reparo das
+07:15 roda numa sessão que já tem o repositório autorizado.
 
 ## O gerador
 
