@@ -72,6 +72,38 @@ exatamente o que a renderização do jornal usa.
 O script falha em voz alta (`FALHA:`) se o bloco de dados ou a aba Clientes
 não forem encontrados, em vez de publicar uma página meio pronta.
 
+## O dossiê de fontes: a coleta melhora sozinha
+
+A lista de veículos do prompt é fixa e genérica. O dossiê olha o que de fato
+aconteceu:
+
+```bash
+python3 tools/fontes.py <estado.html|estado.json>
+```
+
+Ele varre as edições guardadas e monta, por cliente, a lista de veículos que
+já renderam notícia **daquele** cliente. Isso vira a camada (c) do PASSO 2 —
+uma busca dirigida por evidência, em vez de suposição.
+
+Como o estado guarda as 20 edições mais recentes, o dossiê é uma janela
+móvel: veículo que passa a produzir entra sozinho, veículo que seca sai
+sozinho. Quanto mais dias de operação, melhor a mira.
+
+Três garantias de projeto:
+
+- **Aditivo, nunca filtro.** As camadas (a) e (b) continuam obrigatórias, e os
+  veículos do dossiê jamais viram `allowed_domains` — travar em domínio foi
+  justamente o erro que o prompt já proibia.
+- **Sem estado novo.** O dossiê é derivado na hora das edições que já existem;
+  nada é gravado, então não há o que corromper.
+- **Partida a frio tratada.** Cliente sem histórico é listado explicitamente
+  como tal, para que a coleta redobre a atenção nele em vez de esquecê-lo.
+
+O que os primeiros quatro dias mostraram: a rede ASN do Sebrae respondeu por
+28 dos 54 itens, enquanto a varredura na grande imprensa — que consome perto
+de metade do orçamento de busca — rendeu 5. É o tipo de assimetria que só
+aparece medindo, e que a camada (c) passa a explorar.
+
 ## Por que existe um validador
 
 Em 29/08/2026 o disparo automático terminou em **56 segundos**. Não pesquisou
