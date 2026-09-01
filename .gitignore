@@ -1,0 +1,5 @@
+# Fonte do artifact: contém o bloco "auth" (usuário, salt e hash da senha de
+# administrador) e os campos internos dos clientes (query, excluir, razao, site).
+# O repositório é público — só a versão sanitizada por tools/build_publico.py,
+# em docs/index.html, pode ser versionada.
+pauta-thutor.html
