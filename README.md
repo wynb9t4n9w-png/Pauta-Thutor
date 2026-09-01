@@ -146,6 +146,42 @@ O validador recusa a edição, com saída 1, quando:
 Edição **vazia passa** — dia sem notícia é resultado legítimo, sobretudo no fim
 de semana. O que não passa é edição sem coleta.
 
+### A segunda passada
+
+Em 01/09/2026 a coleta voltou com 3 itens de 31 clientes, em 5,3 minutos —
+e SEBRAE/BA e SEBRAE/MG, os dois maiores produtores do histórico, vieram
+vazios. Veículos que publicam quase todo dia não renderam nada.
+
+A curva até ali:
+
+| dia | itens | clientes | buscas | duração |
+|---|---|---|---|---|
+| 29/08 | 19 | 9 | 300 | 15,0 min |
+| 30/08 | 9 | 6 | 201 | 8,4 min |
+| 31/08 | 4 | 4 | 192 | 6,0 min |
+| 01/09 | 3 | 3 | 188 | 5,3 min |
+
+A coleta começa 06:30 e o prazo é 07:30: quase uma hora de janela, usando
+cinco minutos. As execuções longas renderam muito mais que as curtas.
+
+O validador não pode exigir notícia — dia quieto é resultado legítimo. Mas
+pode exigir que a **segunda tentativa** tenha acontecido. Por isso o bloco
+`cobertura` passou a incluir:
+
+```json
+"clientes_silenciosos": 28,
+"segunda_passada_buscas": 42
+```
+
+Se algum cliente ficou sem item na primeira varredura, a edição só passa com
+pelo menos uma busca adicional por cliente silencioso, reformulada (razão
+social, site oficial, nome + veículo do dossiê). Quando o validador reprova
+por isso, o certo **não é desistir**: é voltar ao PASSO 2, fazer a segunda
+passada e validar de novo.
+
+Também virou aviso — não falha — a execução que termina em menos de 8
+minutos, com o lembrete de que não há prêmio por acabar cedo.
+
 ### Testes
 
 ```bash

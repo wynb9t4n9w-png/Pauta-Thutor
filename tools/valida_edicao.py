@@ -16,10 +16,18 @@ Uso:
 Exige que a edição na posição 0 traga um bloco "cobertura":
     "cobertura": {
       "clientes_varridos": 31,
-      "buscas": 62,
-      "iniciado_em":  "2026-08-30T07:30:11-03:00",
-      "concluido_em": "2026-08-30T07:41:52-03:00"
+      "buscas": 188,
+      "clientes_silenciosos": 28,
+      "segunda_passada_buscas": 42,
+      "iniciado_em":  "2026-09-02T06:36:11-03:00",
+      "concluido_em": "2026-09-02T06:52:40-03:00"
     }
+
+A segunda passada existe porque em 01/09/2026 a coleta voltou com 3 itens de
+31 clientes — e SEBRAE/BA e SEBRAE/MG, os dois maiores produtores do
+histórico, vieram vazios. Uma varredura só, com uma formulação de busca só,
+deixa muito na mesa. O validador não pode exigir notícia (dia quieto é
+legítimo), mas pode exigir que a segunda tentativa tenha acontecido.
 """
 
 import json
@@ -32,8 +40,11 @@ from zoneinfo import ZoneInfo
 TZ = ZoneInfo("America/Sao_Paulo")
 EDITORIAS = {"empresa", "setor", "gente", "risco"}
 
-# Uma coleta honesta de 31 clientes em duas camadas leva minutos, não segundos.
+# Uma coleta honesta de 31 clientes em três camadas leva minutos, não segundos.
 DURACAO_MINIMA_S = 120
+# Abaixo disto não é falha — é aviso. A janela até os leitores chegarem é de
+# quase uma hora, e execuções de 5 minutos vêm rendendo menos que as de 15.
+DURACAO_CONFORTAVEL_S = 480
 MAX_ITENS_POR_CLIENTE = 4
 JANELA_DIAS = 7  # notícia muito antiga indica coleta preguiçosa ou data inventada
 
@@ -131,6 +142,28 @@ def valida(estado: dict) -> None:
                 "grande imprensa, provavelmente não foi feita para todos."
             )
 
+        # A segunda passada é sobre ESFORÇO, não sobre resultado: um dia quieto
+        # continua válido, mas ter tentado uma vez só não.
+        silenciosos = cob.get("clientes_silenciosos")
+        segunda = cob.get("segunda_passada_buscas")
+        if not isinstance(silenciosos, int):
+            falha(
+                "cobertura.clientes_silenciosos ausente. Depois da primeira varredura, conte "
+                "quantos clientes ativos ficaram sem nenhum item e registre aqui."
+            )
+        elif silenciosos > 0:
+            if not isinstance(segunda, int):
+                falha(
+                    f"{silenciosos} clientes ficaram silenciosos e cobertura.segunda_passada_buscas "
+                    "não foi registrado. A segunda passada sobre os silenciosos é obrigatória."
+                )
+            elif segunda < silenciosos:
+                falha(
+                    f"a segunda passada fez {segunda} buscas para {silenciosos} clientes silenciosos "
+                    "— menos de uma por cliente. Volte ao PASSO 2, reformule as buscas desses "
+                    "clientes (razão social, site oficial, nome + veículo do dossiê) e tente de novo."
+                )
+
         ini, fim = quando(cob.get("iniciado_em")), quando(cob.get("concluido_em"))
         if ini is None or fim is None:
             falha("cobertura.iniciado_em / concluido_em ausentes ou em formato inválido.")
@@ -141,6 +174,12 @@ def valida(estado: dict) -> None:
                     f"a coleta durou {dur:.0f}s. Uma varredura real de {len(ativos)} clientes "
                     f"leva minutos; abaixo de {DURACAO_MINIMA_S}s a execução não pesquisou nada. "
                     "Foi exatamente assim que o incidente de 29/08/2026 passou despercebido."
+                )
+            elif dur < DURACAO_CONFORTAVEL_S:
+                aviso(
+                    f"a coleta durou {dur/60:.1f} min. Há quase uma hora de janela antes dos "
+                    "leitores chegarem, e as execuções mais longas renderam bem mais: 15 min "
+                    "deram 19 itens, 5 min deram 3. Não há prêmio por terminar cedo."
                 )
 
     # --- os itens são plausíveis? ------------------------------------------
@@ -229,6 +268,9 @@ def main() -> None:
     cob = ed.get("cobertura") or {}
     print(f"ok  edição {ed.get('data')} · {len(ed.get('itens') or [])} itens")
     print(f"    cobertura: {cob.get('clientes_varridos')} clientes · {cob.get('buscas')} buscas")
+    if isinstance(cob.get("clientes_silenciosos"), int):
+        print(f"    segunda passada: {cob.get('segunda_passada_buscas', 0)} buscas "
+              f"sobre {cob['clientes_silenciosos']} clientes silenciosos")
     if avisos:
         print(f"    {len(avisos)} aviso(s) acima, nenhum bloqueante.")
 

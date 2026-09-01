@@ -40,10 +40,14 @@ def edicao(n_itens: int = 3, **cobertura) -> dict:
     cob = {
         "clientes_varridos": 31,
         "buscas": 62,
+        "clientes_silenciosos": 28,
+        "segunda_passada_buscas": 42,
         "iniciado_em": (agora - timedelta(minutes=11)).isoformat(),
         "concluido_em": agora.isoformat(),
     }
     cob.update(cobertura)
+    # None significa "remova esta chave" — serve para testar campo ausente.
+    cob = {k: v for k, v in cob.items() if v is not None}
     return {
         "data": hoje.isoformat(),
         "cobertura": cob,
@@ -105,6 +109,26 @@ CASOS = [
         "auth apagado",
         {**{k: v for k, v in base().items() if k != "auth"}, "edicoes": [edicao()]},
         1,
+    ),
+    (
+        "sem segunda passada",
+        {**base(), "edicoes": [edicao(segunda_passada_buscas=None)]},
+        1,
+    ),
+    (
+        "segunda passada rala (5 buscas / 28 silenciosos)",
+        {**base(), "edicoes": [edicao(segunda_passada_buscas=5)]},
+        1,
+    ),
+    (
+        "sem contagem de silenciosos",
+        {**base(), "edicoes": [edicao(clientes_silenciosos=None)]},
+        1,
+    ),
+    (
+        "dia sem silenciosos dispensa segunda passada",
+        {**base(), "edicoes": [edicao(clientes_silenciosos=0, segunda_passada_buscas=None)]},
+        0,
     ),
     (
         "cliente_id inexistente",
