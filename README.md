@@ -146,6 +146,37 @@ O validador recusa a edição, com saída 1, quando:
 Edição **vazia passa** — dia sem notícia é resultado legítimo, sobretudo no fim
 de semana. O que não passa é edição sem coleta.
 
+### O teto: a rotina só vê a web pelo buscador
+
+Testado em 02/09/2026: a rotina não consegue abrir a página de um veículo nem
+a sala de imprensa de um cliente —
+
+```
+EGRESS_BLOCKED: agenciasebrae.com.br is blocked by the network egress proxy
+```
+
+A política de rede do ambiente ("Personalizado") libera só os domínios de
+artifact, o GitHub Pages e gerenciadores de pacote. Toda a coleta passa pelo
+`WebSearch`. Notícia que o buscador ainda não indexou, ou rankeia baixo, não
+existe para o jornal — e isso pesa sobretudo nos 13 clientes B2B (Atlas,
+Brado, Cantu, Coop Integrada, CRH, Embracon, Família Hansen, Gazin, Neovia,
+Oji, Rocha, SkyFit, Rex), cujas notícias saem em sala de imprensa própria e
+imprensa regional, com cadência mensal e não diária.
+
+Dois caminhos, ambos decisão do dono do ambiente:
+
+- **Rede irrestrita** para o ambiente: destrava `WebFetch` para qualquer site.
+  Permite a camada (d) forte — ler direto a listagem de cada veículo produtivo
+  e a sala de imprensa de cada cliente (campo `site`). Custo: a sessão da
+  rotina passa a alcançar toda a internet.
+- **Manter Personalizado** e adicionar os domínios dos veículos produtivos e
+  dos sites dos clientes à lista. Mais cirúrgico; a lista cresce e precisa de
+  manutenção.
+
+Enquanto isso não muda, a camada (d) usa a versão possível: buscas
+restritas por domínio (`allowed_domains`) ao site do cliente e ao veículo do
+dossiê — o buscador indexa salas de imprensa, mesmo que com atraso.
+
 ### A segunda passada
 
 Em 01/09/2026 a coleta voltou com 3 itens de 31 clientes, em 5,3 minutos —

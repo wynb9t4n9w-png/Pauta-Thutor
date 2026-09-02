@@ -271,6 +271,11 @@ def main() -> None:
     if isinstance(cob.get("clientes_silenciosos"), int):
         print(f"    segunda passada: {cob.get('segunda_passada_buscas', 0)} buscas "
               f"sobre {cob['clientes_silenciosos']} clientes silenciosos")
+    camadas = cob.get("itens_por_camada")
+    if isinstance(camadas, dict) and camadas:
+        # Telemetria opcional: de onde vieram os itens. Serve para medir qual
+        # camada rende e qual so gasta orcamento — nao e exigida.
+        print("    itens por camada: " + ", ".join(f"{k}={v}" for k, v in camadas.items()))
     if avisos:
         print(f"    {len(avisos)} aviso(s) acima, nenhum bloqueante.")
 
