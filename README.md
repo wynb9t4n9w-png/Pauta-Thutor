@@ -20,10 +20,11 @@ para lá.
 
 ## A rotina diária
 
-Uma tarefa agendada roda todo dia às 06:30 (horário de São Paulo) e:
+Uma tarefa agendada roda todo dia às 02:00 (horário de São Paulo) e:
 
 1. lê o estado atual do artifact;
-2. busca notícias dos clientes ativos das últimas 24–48 h;
+2. busca notícias dos clientes ativos das últimas 72 h, em quatro camadas e
+   duas rodadas;
 3. monta a edição do dia e registra a cobertura da coleta;
 4. **valida** a edição — se não passar, não publica;
 5. republica o artifact;
@@ -32,9 +33,11 @@ Uma tarefa agendada roda todo dia às 06:30 (horário de São Paulo) e:
 O GitHub Pages serve `docs/` e atualiza sozinho a cada commit. O endereço
 público nunca muda, então basta compartilhá-lo uma vez.
 
-Às 07:15 uma segunda rotina confere se a página ficou mesmo igual ao artifact
+Às 06:00 uma segunda rotina confere se a página ficou mesmo igual ao artifact
 e repara se não ficou. Os dois horários existem para que o jornal esteja
-pronto antes das 07:30, que é quando os leitores chegam.
+pronto antes das 07:30, que é quando os leitores chegam. A coleta roda de
+madrugada de propósito: assim ela não disputa a cota de uso da conta com o
+trabalho do dia, e sobra folga de horas caso algo atrase.
 
 ### Limitação conhecida: push a partir de rotinas
 
@@ -52,7 +55,7 @@ tentativa de contornar de dentro (`add_repo` com `access="push"`) é barrada
 antes de chegar ao backend.
 
 Enquanto isso não for resolvido na configuração do ambiente, o reparo das
-07:15 roda numa sessão que já tem o repositório autorizado.
+06:00 roda numa sessão que já tem o repositório autorizado.
 
 ## O gerador
 
@@ -203,8 +206,9 @@ A curva até ali:
 | 31/08 | 4 | 4 | 192 | 6,0 min |
 | 01/09 | 3 | 3 | 188 | 5,3 min |
 
-A coleta começa 06:30 e o prazo é 07:30: quase uma hora de janela, usando
-cinco minutos. As execuções longas renderam muito mais que as curtas.
+Na época a coleta começava 06:30 com prazo 07:30: quase uma hora de janela,
+usando cinco minutos. As execuções longas renderam muito mais que as curtas.
+Hoje a coleta começa 02:00 e tem mais de cinco horas até os leitores.
 
 O validador não pode exigir notícia — dia quieto é resultado legítimo. Mas
 pode exigir que a **segunda tentativa** tenha acontecido. Por isso o bloco

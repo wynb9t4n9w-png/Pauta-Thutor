@@ -19,8 +19,8 @@ Exige que a edição na posição 0 traga um bloco "cobertura":
       "buscas": 188,
       "clientes_silenciosos": 28,
       "segunda_passada_buscas": 42,
-      "iniciado_em":  "2026-09-02T06:36:11-03:00",
-      "concluido_em": "2026-09-02T06:52:40-03:00"
+      "iniciado_em":  "2026-09-02T02:06:11-03:00",
+      "concluido_em": "2026-09-02T02:22:40-03:00"
     }
 
 A segunda passada existe porque em 01/09/2026 a coleta voltou com 3 itens de
