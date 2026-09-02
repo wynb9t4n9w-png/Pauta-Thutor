@@ -271,6 +271,9 @@ def main() -> None:
     if isinstance(cob.get("clientes_silenciosos"), int):
         print(f"    segunda passada: {cob.get('segunda_passada_buscas', 0)} buscas "
               f"sobre {cob['clientes_silenciosos']} clientes silenciosos")
+    if "rede_direta" in cob:
+        modo = "leitura direta de veículos e salas de imprensa" if cob["rede_direta"] else "só buscador (WebFetch bloqueado)"
+        print(f"    camada (d): {modo}")
     camadas = cob.get("itens_por_camada")
     if isinstance(camadas, dict) and camadas:
         # Telemetria opcional: de onde vieram os itens. Serve para medir qual

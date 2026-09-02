@@ -21,6 +21,7 @@ import re
 import sys
 from collections import defaultdict
 from pathlib import Path
+from urllib.parse import urlparse
 
 # Um par cliente×veículo entra no dossiê a partir de UMA aparição: com poucos
 # dias de histórico, exigir repetição descartaria quase tudo. O ruído é barato
@@ -45,6 +46,9 @@ def dossie(estado: dict) -> dict:
     por_cliente: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
     ultima: dict[tuple[str, str], str] = {}
     global_: dict[str, int] = defaultdict(int)
+    # Dominio de cada veiculo, extraido das URLs publicadas. E o que permite
+    # ler o veiculo direto (WebFetch) ou restringir uma busca a ele.
+    dominios: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
     edicoes = estado.get("edicoes", [])
 
     for ed in edicoes:
@@ -58,6 +62,9 @@ def dossie(estado: dict) -> dict:
             chave = (cid, fonte)
             if chave not in ultima or data > ultima[chave]:
                 ultima[chave] = data
+            host = urlparse(it.get("url") or "").netloc.lower().removeprefix("www.")
+            if host:
+                dominios[fonte][host] += 1
 
     linhas = []
     for cid in sorted(por_cliente, key=lambda c: -sum(por_cliente[c].values())):
@@ -67,7 +74,9 @@ def dossie(estado: dict) -> dict:
         if not fontes:
             continue
         fontes.sort(key=lambda x: (-x[1], x[0]))
-        desc = ", ".join(f"{f} ({n}x, últ. {ultima[(cid, f)]})" for f, n in fontes)
+        desc = ", ".join(
+            f"{f} [{_dominio(dominios[f])}] ({n}x, últ. {ultima[(cid, f)]})" for f, n in fontes
+        )
         linhas.append(f"{cid} — {nomes.get(cid, cid)}: {desc}")
 
     sem_historico = sorted(
@@ -77,12 +86,20 @@ def dossie(estado: dict) -> dict:
     return {
         "linhas": linhas,
         "global": sorted(global_.items(), key=lambda x: (-x[1], x[0])),
+        "dominios": {f: _dominio(d) for f, d in dominios.items()},
         "sem_historico": sem_historico,
         "edicoes": len(edicoes),
         "periodo": (edicoes[-1].get("data"), edicoes[0].get("data")) if edicoes else (None, None),
         "itens": sum(global_.values()),
         "ativos": len(ativos),
     }
+
+
+def _dominio(contagem: dict[str, int]) -> str:
+    """O host mais frequente daquele veiculo; '?' se nenhuma URL foi parseavel."""
+    if not contagem:
+        return "?"
+    return max(contagem.items(), key=lambda x: x[1])[0]
 
 
 def main() -> None:
@@ -107,9 +124,11 @@ def main() -> None:
     for l in d["linhas"]:
         print(f"  {l}")
     print()
-    print("--- veículos mais produtivos no geral ---")
+    print("--- veículos mais produtivos no geral, com domínio ---")
+    print("Com WebFetch liberado, leia a listagem de notícias destes domínios direto.")
+    print("Com WebFetch bloqueado, use o domínio em allowed_domains numa busca dirigida.")
     for f, n in d["global"][:15]:
-        print(f"  {n:3d}  {f}")
+        print(f"  {n:3d}  {f}  →  {d['dominios'].get(f, '?')}")
     if d["sem_historico"]:
         print()
         print(f"--- {len(d['sem_historico'])} clientes ativos ainda sem histórico ---")
