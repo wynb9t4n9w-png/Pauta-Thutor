@@ -147,8 +147,15 @@ chamadas a serviços externos, o que a mantém rápida e sem depender de nada.
 coleta diária nunca precisa escrever em `estado["clientes"]`. Para incluir outro
 cliente que abra capital, basta uma linha em `ACOES`.
 
-A seta e a cor indicam **direção no período, não juízo de valor**: dólar em alta
-é verde porque subiu, não porque seja boa notícia.
+**A cor indica leitura, não direção.** A seta mostra para onde o número foi; a
+cor mostra o que isso significa para a Thutor. Câmbio em queda é alívio de
+custo e aparece em verde; câmbio em alta, em vermelho. Com as ações é o
+inverso: papel de cliente em queda entra em vermelho, porque costuma haver algo
+acontecendo ali que vale a conversa. Um `▲` vermelho no dólar é leitura
+correta, não defeito.
+
+A regra vive na página (`sinalDe`), e não no coletor, para que as edições já
+arquivadas também passem a segui-la.
 
 ## Por que existe um validador
 

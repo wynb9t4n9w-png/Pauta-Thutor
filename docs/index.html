@@ -152,13 +152,13 @@ input:focus,textarea:focus{outline:2px solid var(--teal);outline-offset:-1px}
   color:var(--mut);font-weight:600;font-variant-numeric:tabular-nums}
 .spark-l{fill:none;stroke-width:2}
 .spark-a{stroke:none}
-.t-alta{color:var(--ok);border-color:#bcd7c9}
-.t-baixa{color:var(--erro);border-color:#e7c4c0}
-.t-estavel{color:var(--mut);border-color:var(--line)}
-.s-alta .spark-l{stroke:var(--ok)}      .s-alta .spark-a{fill:var(--ok);fill-opacity:.11}
-.s-baixa .spark-l{stroke:var(--erro)}   .s-baixa .spark-a{fill:var(--erro);fill-opacity:.11}
-.s-estavel .spark-l{stroke:var(--mut)}  .s-estavel .spark-a{fill:var(--mut);fill-opacity:.09}
-.d-alta{background:var(--ok)} .d-baixa{background:var(--erro)} .d-estavel{background:var(--mut)}
+.t-bom{color:var(--ok);border-color:#bcd7c9}
+.t-atencao{color:var(--erro);border-color:#e7c4c0}
+.t-neutro{color:var(--mut);border-color:var(--line)}
+.s-bom .spark-l{stroke:var(--ok)}       .s-bom .spark-a{fill:var(--ok);fill-opacity:.11}
+.s-atencao .spark-l{stroke:var(--erro)} .s-atencao .spark-a{fill:var(--erro);fill-opacity:.11}
+.s-neutro .spark-l{stroke:var(--mut)}   .s-neutro .spark-a{fill:var(--mut);fill-opacity:.09}
+.d-bom{background:var(--ok)} .d-atencao{background:var(--erro)} .d-neutro{background:var(--mut)}
 .abertura-fonte{margin-top:12px;padding-top:10px;border-top:1px solid var(--line);
   font-size:.72rem;color:var(--mut);line-height:1.45}
 @media (max-width:560px){
@@ -459,6 +459,18 @@ function faisca(serie, tend){
   };
 }
 
+/* A cor não segue a direção do número, e sim o que ele significa para a
+   Thutor: dólar ou euro em queda é alívio de custo e entra em verde; ação de
+   cliente em queda é assunto para a próxima conversa e entra em vermelho. A
+   seta continua mostrando a direção, então ▲ vermelho é leitura correta, não
+   defeito. Fica na página, e não no coletor, para que as edições já
+   arquivadas passem a seguir a mesma convenção. */
+function sinalDe(tipo, tend){
+  if(tend !== "alta" && tend !== "baixa") return "neutro";
+  if(tipo === "cambio") return tend === "baixa" ? "bom" : "atencao";
+  return tend === "alta" ? "bom" : "atencao";
+}
+
 function renderAbertura(ed){
   var t = ed.tempo || null;
   var mkt = ed.mercado || null;
@@ -490,17 +502,18 @@ function renderAbertura(ed){
     h += '<div class="mkt">';
     inds.forEach(function(i){
       var tend = i.tendencia || "estavel";
+      var sinal = sinalDe(i.tipo, tend);
       var seta = tend === "alta" ? "▲" : (tend === "baixa" ? "▼" : "→");
-      var f = faisca(i.serie || [], tend);
+      var f = faisca(i.serie || [], sinal);
       var curto = (i.detalhe || "").split(" · ")[0];
       h += '<div class="mkt-i">'+
         '<div class="mkt-top">'+
           '<span class="mkt-rot">'+esc(i.rotulo)+'</span>'+
-          '<span class="mkt-var t-'+tend+'">'+seta+' '+fmtPct(i.var_30d)+' · 30d</span>'+
+          '<span class="mkt-var t-'+sinal+'">'+seta+' '+fmtPct(i.var_30d)+' · 30d</span>'+
         '</div>'+
         '<div class="mkt-val">R$ '+fmtN(i.valor, i.casas)+'</div>'+
         '<div class="mkt-det">'+esc(curto)+' · dia '+fmtPct(i.var_dia)+'</div>'+
-        (f ? '<div class="mkt-spark">'+f.svg+'<i class="mkt-dot d-'+tend+'" style="top:'+f.topo+'%"></i></div>' : '')+
+        (f ? '<div class="mkt-spark">'+f.svg+'<i class="mkt-dot d-'+sinal+'" style="top:'+f.topo+'%"></i></div>' : '')+
         '<div class="mkt-pe"><span>mín '+fmtN(i.min_30d, i.casas)+'</span>'+
           '<span>máx '+fmtN(i.max_30d, i.casas)+'</span></div>'+
       '</div>';
@@ -512,7 +525,9 @@ function renderAbertura(ed){
   if(t) creditos.push("Previsão do dia para " + esc(t.cidade || "") + ": " + esc(t.fonte || "Open-Meteo") + ".");
   if(inds.length){
     creditos.push("Dólar e euro pela PTAX de venda do Banco Central; ações pelo fechamento na B3.");
-    creditos.push("A variação de 30 dias compara o último fechamento com o de 30 dias atrás.");
+    creditos.push("A variação de 30 dias compara o último fechamento com o de 30 dias atrás. "+
+                    "A cor indica leitura, não direção: câmbio em queda e ação de cliente em alta "+
+                    "aparecem em verde; câmbio em alta e ação em queda, em vermelho.");
   }
   h += '<div class="abertura-fonte">'+creditos.join(" ")+'</div>';
   return h + '</div>';
