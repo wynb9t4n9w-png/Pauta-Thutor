@@ -70,6 +70,26 @@ def sem_cobertura() -> dict:
     return {k: v for k, v in edicao().items() if k != "cobertura"}
 
 
+def abertura(**troca) -> dict:
+    """Uma faixa de abertura íntegra, com os campos que a página lê."""
+    ind = {
+        "id": "usd", "rotulo": "Dólar", "detalhe": "USD/BRL · PTAX venda",
+        "fonte": "Banco Central", "tipo": "cambio", "casas": 4,
+        "data": hoje.isoformat(), "valor": 5.1253, "var_dia": 0.57, "var_30d": 0.19,
+        "min_30d": 5.0908, "max_30d": 5.2236, "tendencia": "estavel",
+        "serie": [5.1, 5.12, 5.1253],
+    }
+    ind.update(troca)
+    ind = {k: v for k, v in ind.items() if v is not None}
+    return {
+        "tempo": {
+            "cidade": "Americana/SP", "data": hoje.isoformat(), "condicao": "Nublado",
+            "icone": "nuvem", "max": 30, "min": 15, "chuva_pct": 21, "fonte": "Open-Meteo",
+        },
+        "mercado": {"apurado_em": agora.isoformat(), "indicadores": [ind]},
+    }
+
+
 def url_repetida() -> dict:
     it = lambda cid: {  # noqa: E731
         "cliente_id": cid, "editoria": "empresa", "titulo": "T", "resumo": "",
@@ -128,6 +148,64 @@ CASOS = [
     (
         "dia sem silenciosos dispensa segunda passada",
         {**base(), "edicoes": [edicao(clientes_silenciosos=0, segunda_passada_buscas=None)]},
+        0,
+    ),
+    # --- faixa de abertura: opcional, mas íntegra quando vem ----------------
+    (
+        "abertura completa (tempo + mercado)",
+        {**base(), "edicoes": [{**edicao(), **abertura()}]},
+        0,
+    ),
+    (
+        "sem abertura nenhuma (API fora do ar)",
+        {**base(), "edicoes": [edicao()]},
+        0,
+    ),
+    (
+        "indicador sem valor de fechamento",
+        {**base(), "edicoes": [{**edicao(), **abertura(valor=None)}]},
+        1,
+    ),
+    (
+        "indicador com tendência inventada",
+        {**base(), "edicoes": [{**edicao(), **abertura(tendencia="subindo")}]},
+        1,
+    ),
+    (
+        "série curta demais para o gráfico",
+        {**base(), "edicoes": [{**edicao(), **abertura(serie=[5.1])}]},
+        1,
+    ),
+    (
+        "fechamento com data no futuro",
+        {
+            **base(),
+            "edicoes": [{**edicao(), **abertura(data=(hoje + timedelta(days=1)).isoformat())}],
+        },
+        1,
+    ),
+    (
+        "previsão do tempo sem temperatura",
+        {
+            **base(),
+            "edicoes": [{
+                **edicao(),
+                "tempo": {"cidade": "Americana/SP", "data": hoje.isoformat(),
+                          "condicao": "Nublado", "icone": "nuvem", "min": 15},
+            }],
+        },
+        1,
+    ),
+    (
+        "previsão de ontem é aviso, não falha",
+        {
+            **base(),
+            "edicoes": [{
+                **edicao(),
+                "tempo": {"cidade": "Americana/SP", "data": (hoje - timedelta(days=1)).isoformat(),
+                          "condicao": "Nublado", "icone": "nuvem", "max": 28, "min": 14},
+            }],
+        },
         0,
     ),
     (

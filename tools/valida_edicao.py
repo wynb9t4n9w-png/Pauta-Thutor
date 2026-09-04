@@ -39,11 +39,12 @@ from zoneinfo import ZoneInfo
 
 TZ = ZoneInfo("America/Sao_Paulo")
 EDITORIAS = {"empresa", "setor", "gente", "risco"}
+TENDENCIAS = {"alta", "baixa", "estavel"}
 
 # Uma coleta honesta de 31 clientes em três camadas leva minutos, não segundos.
 DURACAO_MINIMA_S = 120
-# Abaixo disto não é falha — é aviso. A janela até os leitores chegarem é de
-# quase uma hora, e execuções de 5 minutos vêm rendendo menos que as de 15.
+# Abaixo disto não é falha — é aviso. Da coleta (02:00) até os leitores (07:30)
+# são horas de folga, e execuções de 5 minutos vêm rendendo menos que as de 15.
 DURACAO_CONFORTAVEL_S = 480
 MAX_ITENS_POR_CLIENTE = 4
 JANELA_DIAS = 7  # notícia muito antiga indica coleta preguiçosa ou data inventada
@@ -177,9 +178,10 @@ def valida(estado: dict) -> None:
                 )
             elif dur < DURACAO_CONFORTAVEL_S:
                 aviso(
-                    f"a coleta durou {dur/60:.1f} min. Há quase uma hora de janela antes dos "
-                    "leitores chegarem, e as execuções mais longas renderam bem mais: 15 min "
-                    "deram 19 itens, 5 min deram 3. Não há prêmio por terminar cedo."
+                    f"a coleta durou {dur/60:.1f} min. A coleta começa às 02:00 e os leitores "
+                    "chegam às 07:30, então há horas de folga — e as execuções mais longas "
+                    "renderam bem mais: 15 min deram 19 itens, 5 min deram 3. Não há prêmio "
+                    "por terminar cedo."
                 )
 
     # --- os itens são plausíveis? ------------------------------------------
@@ -240,9 +242,84 @@ def valida(estado: dict) -> None:
         if n > 1:
             falha(f"cliente '{cid}' com {n} itens de editoria 'setor' (máximo 1).")
 
+    valida_abertura(ed)
+
     # Edição vazia é resultado legítimo — fim de semana costuma ser assim.
     if not itens:
         aviso("edição sem nenhuma notícia. É um resultado válido, mas confira se as buscas rodaram.")
+
+
+def valida_abertura(ed: dict) -> None:
+    """Confere a faixa de abertura: previsão do tempo e indicadores de mercado.
+
+    Os dois blocos são OPCIONAIS. Uma API fora do ar não pode derrubar a edição
+    do dia — o jornal são as notícias, e a abertura é enfeite útil. Mas, se o
+    bloco vier, ele precisa estar íntegro: a página lê esses campos direto para
+    montar os quadros e o gráfico, e meia informação na capa é pior que nenhuma.
+    """
+    tempo = ed.get("tempo")
+    if tempo is not None:
+        if not isinstance(tempo, dict):
+            falha("o bloco 'tempo' não é um objeto.")
+        else:
+            for campo in ("cidade", "condicao", "icone"):
+                if not tempo.get(campo):
+                    falha(f"o bloco 'tempo' está sem '{campo}'.")
+            for campo in ("max", "min"):
+                if not isinstance(tempo.get(campo), (int, float)):
+                    falha(f"'tempo.{campo}' precisa ser um número (veio {tempo.get(campo)!r}).")
+            if tempo.get("data") != ed.get("data"):
+                aviso(
+                    f"a previsão do tempo é de {tempo.get('data')} e a edição é de "
+                    f"{ed.get('data')} — a capa mostraria a previsão de outro dia."
+                )
+
+    mercado = ed.get("mercado")
+    if mercado is None:
+        return
+    if not isinstance(mercado, dict):
+        falha("o bloco 'mercado' não é um objeto.")
+        return
+
+    indicadores = mercado.get("indicadores")
+    if not isinstance(indicadores, list) or not indicadores:
+        falha("o bloco 'mercado' veio sem a lista 'indicadores'.")
+        return
+
+    for n, ind in enumerate(indicadores):
+        onde = f"mercado.indicadores[{n}]"
+        if not isinstance(ind, dict):
+            falha(f"{onde} não é um objeto.")
+            continue
+        rot = ind.get("rotulo")
+        if not rot:
+            falha(f"{onde} está sem 'rotulo'.")
+        if not isinstance(ind.get("valor"), (int, float)):
+            falha(f"{onde} ({rot}) está sem valor numérico de fechamento.")
+        if ind.get("tendencia") not in TENDENCIAS:
+            falha(
+                f"{onde} ({rot}) tem tendencia {ind.get('tendencia')!r} — "
+                f"use uma de {sorted(TENDENCIAS)}."
+            )
+        serie = ind.get("serie")
+        if not isinstance(serie, list) or len(serie) < 2:
+            falha(f"{onde} ({rot}) precisa de uma série com ao menos dois pontos para o gráfico.")
+        elif any(not isinstance(v, (int, float)) for v in serie):
+            falha(f"{onde} ({rot}) tem ponto não numérico na série.")
+
+        data = ind.get("data")
+        try:
+            dia = datetime.strptime(str(data), "%Y-%m-%d").date()
+        except ValueError:
+            falha(f"{onde} ({rot}) tem data {data!r}, que não é AAAA-MM-DD.")
+            continue
+        if dia > datetime.now(TZ).date():
+            falha(f"{onde} ({rot}) tem data no futuro ({data}).")
+        elif (datetime.now(TZ).date() - dia).days > 5:
+            aviso(
+                f"o fechamento de {rot} é de {data}, mais de cinco dias atrás — "
+                "a fonte pode ter parado de atualizar."
+            )
 
 
 def main() -> None:

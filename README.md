@@ -107,6 +107,49 @@ O que os primeiros quatro dias mostraram: a rede ASN do Sebrae respondeu por
 de metade do orçamento de busca — rendeu 5. É o tipo de assimetria que só
 aparece medindo, e que a camada (c) passa a explorar.
 
+## A faixa de abertura: tempo e mercado
+
+Antes das notícias, a edição abre com a previsão do dia para **Americana/SP**,
+sede da Thutor, e com quatro cotações: dólar, euro e as ações dos dois clientes
+de capital aberto, Cemig (CMIG4) e Taesa (TAEE11). Cada cotação traz o
+fechamento do último pregão, a variação no dia, a variação em 30 dias, a mínima
+e a máxima do período e um gráfico da série — para se ver de relance se está em
+alta, em queda ou de lado.
+
+```bash
+python3 tools/abertura.py          # resumo legível + JSON
+python3 tools/abertura.py --json   # só o JSON, para a coleta colar na edição
+```
+
+A saída tem duas chaves, `tempo` e `mercado`, que a coleta copia para dentro do
+objeto da edição.
+
+| Dado | Fonte | Observação |
+|---|---|---|
+| Previsão do dia | Open-Meteo | Sem cadastro. Máxima, mínima, condição e chance de chuva. |
+| Dólar e euro | Banco Central, séries SGS 1 e 21619 | PTAX de venda, a taxa oficial — não é cotação de casa de câmbio. |
+| CMIG4 e TAEE11 | Yahoo Finance | Fechamento do pregão na B3. |
+
+Três decisões que valem registro:
+
+**Os dois blocos são opcionais.** Se uma API não responder, aquele pedaço da
+faixa não aparece e a edição sai assim mesmo. O jornal são as notícias; a
+abertura é um complemento útil. O validador não exige nenhum dos dois blocos —
+mas, se o bloco vier, cobra que esteja íntegro, porque meia informação na capa é
+pior que nenhuma.
+
+**Os números são congelados na coleta**, não buscados quando alguém abre a
+página. Uma edição é o retrato de um dia: quem abrir o arquivo daqui a um mês
+verá o câmbio daquele dia, não o de hoje. A página pública também não faz
+chamadas a serviços externos, o que a mantém rápida e sem depender de nada.
+
+**O mapa de tickers vive em `tools/abertura.py`**, não na carteira. Assim a
+coleta diária nunca precisa escrever em `estado["clientes"]`. Para incluir outro
+cliente que abra capital, basta uma linha em `ACOES`.
+
+A seta e a cor indicam **direção no período, não juízo de valor**: dólar em alta
+é verde porque subiu, não porque seja boa notícia.
+
 ## Por que existe um validador
 
 Em 29/08/2026 o disparo automático terminou em **56 segundos**. Não pesquisou
