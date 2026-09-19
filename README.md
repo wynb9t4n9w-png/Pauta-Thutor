@@ -107,6 +107,37 @@ O que os primeiros quatro dias mostraram: a rede ASN do Sebrae respondeu por
 de metade do orçamento de busca — rendeu 5. É o tipo de assimetria que só
 aparece medindo, e que a camada (c) passa a explorar.
 
+## O último metro: conferir o que está no ar
+
+Em 19/09/2026 a coleta rodou, o validador aprovou e o commit entrou no
+repositório às 02:20 — e os leitores passaram a manhã vendo a edição da
+véspera. O deploy do GitHub Pages falhou sozinho, num passo que não é nosso:
+
+```
+Error message: Failed to get ID Token.
+Request timeout: /32//idtoken/...
+```
+
+O build tinha funcionado; só a publicação não. Ninguém percebeu porque as duas
+rotinas comparavam artifact e repositório e davam o ciclo por encerrado ali.
+**O repositório estar certo não significa que o leitor esteja vendo o certo.**
+
+```bash
+python3 tools/checa_publicacao.py    # baixa a URL pública e compara
+```
+
+| Saída | Significado |
+|---|---|
+| 0 | a página no ar serve o mesmo que o repositório |
+| 1 | está atrasada — o deploy não aconteceu |
+| 2 | não deu para verificar (rede, site fora do ar) |
+
+O 2 é separado do 1 de propósito: não conseguir olhar não é o mesmo que olhar
+e encontrar problema. Quando dá 1, o conteúdo está correto e o que falta é o
+deploy: re-rodar a execução de *pages build and deployment* que falhou resolve;
+se o re-run ficar preso na fila, um commit novo no branch dispara um build
+limpo.
+
 ## A faixa de abertura: tempo e mercado
 
 Antes das notícias, a edição abre com a previsão do dia para **Americana/SP**,
