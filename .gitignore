@@ -3,3 +3,11 @@
 # O repositório é público — só a versão sanitizada por tools/build_publico.py,
 # em docs/index.html, pode ser versionada.
 pauta-thutor.html
+
+# Arquivo de trabalho da camada (e): candidatos que tools/feeds.py entrega à
+# coleta. É refeito toda noite e não tem valor histórico — o histórico que
+# importa fica em fontes/saude.json.
+candidatos.json
+
+# Bytecode que os testes geram ao importar tools/feeds.py.
+__pycache__/

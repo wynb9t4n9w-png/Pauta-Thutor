@@ -188,6 +188,100 @@ correta, não defeito.
 A regra vive na página (`sinalDe`), e não no coletor, para que as edições já
 arquivadas também passem a segui-la.
 
+## Camada (e): feeds — o estudo de 28/09/2026
+
+A pergunta era se as fontes estavam bloqueando o robô e o jornal perdendo força.
+Medimos antes de mexer, e a resposta foi mais interessante que um sim.
+
+**Ninguém estava bloqueando a coleta.** A rotina lê com o WebFetch, e ele abriu
+normalmente ASN, CCEE e Sesc DF. CCEE e CanalEnergia recusam (403) requisições
+diretas de servidor, mas não o leitor que a rotina usa.
+
+**A edição fraca daquele dia era de segunda-feira.** Nas três semanas anteriores:
+
+| dia | notícias por edição (média) |
+|---|---|
+| segunda | 10 |
+| demais dias | 21 a 32 |
+
+A edição de segunda cobre o fim de semana, quando as agências institucionais
+quase não publicam, e o que saiu na sexta já entrou nas edições de sábado e
+domingo. Em 28/09 a ASN publicou uma única matéria inédita dos nossos clientes
+na janela inteira — e ela entrou.
+
+**Onde havia perda real:**
+
+- *Concentração.* A ASN respondeu por 248 de ~460 itens (54%). O volume do
+  jornal acompanhava o calendário de uma única fonte.
+- *Recall irregular.* Contra os feeds da própria ASN, a coleta preenchia 85%
+  das vagas possíveis dos 7 clientes Sebrae — e os 15% restantes dependiam do
+  que o modelo escolhia ler em cada noite. A página inicial da ASN não mostra a
+  data das manchetes, então cada uma precisava ser aberta para caber ou não na
+  janela.
+- *Os outros 24 clientes.* Energia, cooperativas e B2B concentram os 15 a 26
+  silenciosos de cada noite. Nas janelas de 24/09 e 26/09, os feeds teriam
+  trazido manchetes da própria CCEE que a edição perdeu — e a eleição da nova
+  diretora um dia antes de ela chegar por outro veículo.
+
+### O que a camada (e) faz
+
+`tools/feeds.py` lê os feeds de `fontes/feeds.json` e entrega candidatos:
+
+```bash
+python3 tools/feeds.py pauta-thutor.html --saida candidatos.json --saude fontes/saude.json
+```
+
+- **Salas de imprensa dos clientes** (ASN de 7 estados, Cemig, Jeito Gazin,
+  Brado, Grupo CRH, Almeida Junior): todo item na janela é do cliente.
+- **Veículos setoriais e regionais** (MundoCoop, MegaWhat, Cenário Energia,
+  eixos, CQCS, Sonho Seguro, Revista Apólice, Diário do Comércio, ND Mais, Folha
+  de Londrina, Brazil Journal, NeoFeed e outros): cada item é cruzado com os
+  termos de cada cliente — nomes, não assuntos. Menção no título pesa mais que
+  menção só no corpo, e vem marcada.
+- Pagina cada feed só até alcançar o início da janela. Um item fixado no topo
+  não engana a parada; feed que ignora a paginação é detectado e marcado.
+
+Feed resolve as três fraquezas de uma vez: cada item traz a data, a leitura é
+a mesma toda noite, e não se gasta um modelo lendo uma página inteira para
+aproveitar três linhas.
+
+### Como a camada (e) trata os editores
+
+Feed é a porta que o próprio site deixa aberta para leitores automáticos. Folha
+de Londrina e Bem Paraná recusavam robôs na página inicial e serviam o feed
+normalmente: a escolha do editor é essa, e a gente a segue.
+
+- identificação honesta, com endereço de contato;
+- `robots.txt` consultado e respeitado, pela RFC 9309;
+- uma requisição por vez, com pausa entre duas no mesmo site;
+- nenhum disfarce de navegador, nenhum contorno de bloqueio.
+
+O RSS de busca do Google Notícias funcionaria tecnicamente e daria cobertura
+ampla — e o `robots.txt` dele proíbe esse caminho, nomeando os robôs da
+Anthropic. Ficou de fora por isso. Quando um veículo recusar, a informação
+dele continua chegando pelas camadas de busca e pelos outros veículos que o
+repercutem, que é como a CCEE aparece hoje via MegaWhat e Cenário Energia.
+
+### Saúde das fontes
+
+`fontes/saude.json` guarda, por noite, o estado de cada feed: status, quantos
+itens leu, quantos caíram na janela e até onde a leitura alcançou. A cada
+execução, o script compara com as noites anteriores e avisa quando uma fonte
+que vinha bem **passou a falhar**, quando **secou** por três noites ou quando
+**deixou de alcançar** o início da janela. "Parece que estão bloqueando" vira
+um fato com data.
+
+### Recall no validador
+
+```bash
+python3 tools/valida_edicao.py pauta-thutor.html --candidatos candidatos.json
+```
+
+Avisa quando um candidato forte — da sala de imprensa do cliente, ou com o
+nome dele no título — ficou fora de uma edição em que aquele cliente ainda
+tinha vaga. É aviso, não falha: a coleta pode ter motivo para descartar, mas
+precisa olhar.
+
 ## Por que existe um validador
 
 Em 29/08/2026 o disparo automático terminou em **56 segundos**. Não pesquisou
@@ -310,6 +404,10 @@ Também virou aviso — não falha — a execução que termina em menos de 8
 minutos, com o lembrete de que não há prêmio por acabar cedo.
 
 ### Testes
+
+`python3 tools/teste_feeds.py` cobre a camada (e) sem rede: leitura de RSS e Atom,
+datas sem fuso, casamento sem acento, `excluir`, janela, matéria fixada no topo,
+url já publicada, sala de imprensa própria e os três alertas de saúde.
 
 ```bash
 python3 tools/teste_validador.py   # o portão da coleta

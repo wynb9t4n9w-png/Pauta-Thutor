@@ -11,7 +11,12 @@ percebe — o jornal simplesmente mostra a notícia de ontem.
 Este script é o portão. Ele falha em voz alta e com código de saída 1.
 
 Uso:
-    python3 tools/valida_edicao.py <estado.html|estado.json>
+    python3 tools/valida_edicao.py <estado.html|estado.json> [--candidatos candidatos.json]
+
+Com --candidatos (a saída de tools/feeds.py), também confere o recall: avisa quando
+um candidato forte da camada (e) — da sala de imprensa do próprio cliente, ou com o
+nome dele no título — ficou fora de uma edição em que aquele cliente ainda tinha vaga.
+É aviso, não falha: a coleta pode ter bons motivos para descartar, mas precisa ver.
 
 Exige que a edição na posição 0 traga um bloco "cobertura":
     "cobertura": {
@@ -322,12 +327,61 @@ def valida_abertura(ed: dict) -> None:
             )
 
 
-def main() -> None:
-    if len(sys.argv) < 2:
-        raise SystemExit(__doc__)
+def confere_recall(estado: dict, caminho: Path) -> None:
+    """Candidato forte que ficou de fora com vaga sobrando é perda de recall.
 
-    estado = carrega(Path(sys.argv[1]))
+    Em 28/09/2026 medimos à mão: nos dias úteis, cerca de 15% das pautas das
+    agências dos próprios clientes ficavam de fora sem motivo — a coleta lia a
+    página inicial e cada noite escolhia um pouco diferente. Este aviso torna a
+    medida automática.
+    """
+    try:
+        dados = json.loads(caminho.read_text(encoding="utf8"))
+    except (OSError, ValueError) as e:
+        aviso(f"não consegui ler os candidatos em {caminho} ({e}); recall não conferido.")
+        return
+    ed = (estado.get("edicoes") or [{}])[0]
+    itens = ed.get("itens") or []
+    urls = {(i.get("url") or "").rstrip("/") for i in itens}
+    por_cliente: dict[str, int] = {}
+    for i in itens:
+        por_cliente[i.get("cliente_id")] = por_cliente.get(i.get("cliente_id"), 0) + 1
+
+    fora = []
+    for c in dados.get("candidatos") or []:
+        if c.get("onde") not in ("feed_proprio", "titulo"):
+            continue
+        if (c.get("url") or "").rstrip("/") in urls:
+            continue
+        if por_cliente.get(c.get("cliente_id"), 0) >= MAX_ITENS_POR_CLIENTE:
+            continue
+        fora.append(c)
+
+    if fora:
+        lista = "; ".join(f"{c.get('cliente')}: {c.get('titulo', '')[:60]}" for c in fora[:8])
+        mais = f" (e mais {len(fora) - 8})" if len(fora) > 8 else ""
+        aviso(
+            f"{len(fora)} candidato(s) forte(s) da camada (e) ficaram fora, em clientes que "
+            f"ainda tinham vaga: {lista}{mais}. Inclua ou tenha um motivo para descartar."
+        )
+
+
+def main() -> None:
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    if not args:
+        raise SystemExit(__doc__)
+    candidatos = None
+    if "--candidatos" in sys.argv:
+        i = sys.argv.index("--candidatos")
+        if i + 1 >= len(sys.argv):
+            raise SystemExit("--candidatos precisa do caminho do arquivo")
+        candidatos = Path(sys.argv[i + 1])
+        args = [a for a in args if a != sys.argv[i + 1]]
+
+    estado = carrega(Path(args[0]))
     valida(estado)
+    if candidatos is not None:
+        confere_recall(estado, candidatos)
 
     for a in avisos:
         print(f"aviso: {a}")

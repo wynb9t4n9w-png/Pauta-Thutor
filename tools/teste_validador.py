@@ -247,11 +247,46 @@ def main() -> None:
             if not ok:
                 print("     " + (r.stdout or r.stderr).strip().replace("\n", "\n     "))
 
+    # --- recall contra os candidatos da camada (e) --------------------------
+    def cand(cliente_id, url, onde="feed_proprio"):
+        return {"cliente_id": cliente_id, "cliente": cliente_id.upper(), "url": url,
+                "titulo": f"Pauta de {cliente_id}", "onde": onde}
+
+    cheio = {**edicao(0), "itens": [
+        {"cliente_id": "c1", "editoria": "empresa", "titulo": f"T{k}", "resumo": "",
+         "fonte": "F", "url": f"https://exemplo.com/c1-{k}", "data": hoje.isoformat()}
+        for k in range(4)]}
+    RECALL = [
+        ("recall: candidato forte ficou de fora com vaga -> aviso",
+         [edicao(3)], [cand("c9", "https://feed.com/1")], True),
+        ("recall: candidato já está na edição -> sem aviso",
+         [edicao(3)], [cand("c0", "https://exemplo.com/0")], False),
+        ("recall: cliente já tem 4 itens -> sem aviso",
+         [cheio], [cand("c1", "https://feed.com/2")], False),
+        ("recall: menção só no corpo não cobra -> sem aviso",
+         [edicao(3)], [cand("c9", "https://feed.com/3", onde="corpo")], False),
+    ]
+    with tempfile.TemporaryDirectory() as tmp:
+        for nome, eds, cands, espera_aviso in RECALL:
+            est = Path(tmp) / "estado.json"
+            cf = Path(tmp) / "candidatos.json"
+            est.write_text(json.dumps({**base(), "edicoes": eds}, ensure_ascii=False), encoding="utf8")
+            cf.write_text(json.dumps({"candidatos": cands}, ensure_ascii=False), encoding="utf8")
+            r = subprocess.run([sys.executable, str(VALIDADOR), str(est), "--candidatos", str(cf)],
+                               capture_output=True, text=True)
+            avisou = "candidato(s) forte(s)" in r.stdout
+            ok = r.returncode == 0 and avisou == espera_aviso
+            falhou += not ok
+            print(f"{'ok  ' if ok else 'FALHOU'} {nome:<{largura}}  saída={r.returncode} aviso={avisou}")
+            if not ok:
+                print("     " + (r.stdout or r.stderr).strip().replace("\n", "\n     "))
+
+    total = len(CASOS) + len(RECALL)
     print()
     if falhou:
-        print(f"{falhou} de {len(CASOS)} testes falharam.")
+        print(f"{falhou} de {total} testes falharam.")
         raise SystemExit(1)
-    print(f"{len(CASOS)} de {len(CASOS)} testes passaram.")
+    print(f"{total} de {total} testes passaram.")
 
 
 if __name__ == "__main__":
