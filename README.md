@@ -232,7 +232,7 @@ python3 tools/feeds.py pauta-thutor.html --saida candidatos.json --saude fontes/
 ```
 
 - **Salas de imprensa dos clientes** (ASN de 7 estados, Cemig, Jeito Gazin,
-  Brado, Grupo CRH, Almeida Junior): todo item na janela é do cliente.
+  Almeida Junior): todo item na janela é do cliente.
 - **Veículos setoriais e regionais** (MundoCoop, MegaWhat, Cenário Energia,
   eixos, CQCS, Sonho Seguro, Revista Apólice, Diário do Comércio, ND Mais, Folha
   de Londrina, Brazil Journal, NeoFeed e outros): cada item é cruzado com os
@@ -270,6 +270,12 @@ execução, o script compara com as noites anteriores e avisa quando uma fonte
 que vinha bem **passou a falhar**, quando **secou** por três noites ou quando
 **deixou de alcançar** o início da janela. "Parece que estão bloqueando" vira
 um fato com data.
+
+Desde 30/09 avisa também, uma vez, quando um feed está **parado**: o item mais
+novo tem mais de 90 dias. Os alertas anteriores só comparavam uma noite com as
+outras, e um feed morto desde o cadastro nunca "passa a falhar" — foi assim que
+Brado, Grupo CRH e ABAC ficaram semanas no registro servindo posts de 2016 e
+2022 ("Olá, mundo!").
 
 ### Recall no validador
 
@@ -321,6 +327,46 @@ sem nenhum item, gente/risco por edição, % de conteúdo de serviço, % Sistema
 buscas, itens por camada e pares de pauta repetida. Com `--links`, confere o
 status HTTP de cada link e se a matéria cita o cliente. Termina com os
 "pontos de atenção". Rode de vez em quando: é o termômetro da coleta.
+
+## Clientes que não apareciam — o estudo de 30/09/2026
+
+Em 20 edições, cinco clientes tiveram **zero** itens (Atlas, Rex, Neovia,
+Família Hansen, CRH) e seis tiveram um ou dois (Cantu, Rocha, SkyFit, Tigre,
+Sicoob Cooplivre, Sicoob Sul Serrano). Cada um foi pesquisado: onde é a sede,
+quem cobriu o cliente nos últimos 12 meses, quem são os executivos, e por que a
+coleta não achava nada. Três causas se repetem:
+
+- **Outro nome.** A Atlas sai como Dako (marca dela desde 2017); a CRH sai
+  pelos empreendimentos (Cidade das Águas, Paraíso das Araucárias); a Rocha sai
+  só como "Rocha" na manchete; a Tigre virou "Grupo Tigre" nos 85 anos.
+- **Imprensa da sede.** Cooplivre é notícia em Capivari (Raízes FM, O
+  Semanário); Atlas, em Pato Branco (Diário do Sudoeste); Rocha, em Paranaguá e
+  na imprensa portuária; Cantu, no 54psi, do setor de pneus.
+- **Silêncio real.** Rex e Família Hansen quase não saem em lugar nenhum; o
+  esperado é 0 a 1 item por mês. Nenhuma fonte nova muda isso, e o jornal não
+  deve inventar volume.
+
+O que mudou:
+
+- **18 feeds novos** em `fontes/feeds.json`, todos conferidos com o robots.txt
+  e com cobertura real do cliente — dois deles são feeds de busca do próprio
+  site (`?s=termo&feed=rss2`). Numa leitura de 60 dias, renderam matérias da
+  Cooplivre, da Cantu, do Sicoob Sul-Serrano e da SkyFit que o jornal não tinha.
+  Saíram três feeds parados. Um mesmo veículo com dois feeds usa o campo
+  `veiculo`, porque `nome` é a chave da saúde das fontes.
+- **Termos e contexto**: executivos confirmados, marcas (Dako, Gripmaster,
+  Speedmax), empreendimentos. "Joinville" deixou de bastar para a Tigre —
+  "Tigre" também é o Criciúma —, e a Rocha passou a exigir Paranaguá, Porto de
+  Santana ou Arco Norte, depois que "Almirante Rocha" numa feira naval casou.
+  `teste_feeds.py` confere esses casos contra o registro real.
+- **`fontes/complementares.json`**: o que não tem feed. Por cliente, uma nota
+  (por que aparece pouco), páginas para ler na camada (d), buscas extras para a
+  camada (a) e executivos com a fonte e a data em que foram confirmados. O
+  `tools/fontes.py` imprime tudo no fim do dossiê, e o prompt da coleta manda
+  usar.
+- **Cadastro corrigido** no artifact: UF e site da Atlas (Pato Branco/PR,
+  institucional.atlaseletro.com.br), UF da Cantu (SC) e da Rocha (PR), site da
+  Rocha e da Cooplivre, consultas e exclusões de todos os onze.
 
 ## Por que existe um validador
 

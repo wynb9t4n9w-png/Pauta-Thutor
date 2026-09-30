@@ -1,0 +1,183 @@
+{
+  "_sobre": [
+    "Fontes complementares CURADAS, para os clientes que quase não aparecem no jornal.",
+    "O dossiê (tools/fontes.py) aprende com o histórico, mas cliente que nunca sai não deixa",
+    "rastro. Este registro foi montado em 30/09/2026, depois de 20 edições em que cinco",
+    "clientes tiveram zero itens e outros seis, um ou dois.",
+    "",
+    "nota:    por que o cliente aparece pouco; o que costuma virar notícia dele.",
+    "paginas: salas de imprensa e veículos SEM feed, para leitura direta na camada (d).",
+    "         Os que têm feed estão em fontes/feeds.json e são lidos pela camada (e).",
+    "buscas:  formulações extras para a camada (a) e para a segunda passada.",
+    "pessoas: executivos confirmados em fonte datada; úteis na segunda passada.",
+    "",
+    "Tudo aqui foi conferido com o robots.txt para o agente PautaThutor. Sites que recusaram",
+    "acesso ficaram de fora e não devem ser contornados."
+  ],
+  "clientes": {
+    "atlas": {
+      "nota": "Sede em Pato Branco/PR, 2ª fábrica em Escada/PE (2024). Dona da marca Dako desde 2017: muitos releases saem só como 'Dako'. Empresa de ciclo de release, poucas notícias por mês (Exame 12/04, IstoÉ Dinheiro 10/05, Diário do Sudoeste 14 e 28/05/2026).",
+      "paginas": [
+        {"nome": "Atlas — na mídia", "tipo": "sala de imprensa", "url": "https://institucional.atlaseletro.com.br/quem-somos/atlas-na-midia/"}
+      ],
+      "buscas": [
+        "\"Atlas\" Dako fogões",
+        "\"Atlas Eletrodomésticos\" OR \"dona da Dako\" OR \"dona dos fogões Atlas\"",
+        "Dako (fogão OR fogões OR cooktop) lançamento",
+        "\"Márcio Veiga\" Atlas"
+      ],
+      "pessoas": [
+        {"nome": "Márcio Veiga", "cargo": "CEO", "fonte": "https://exame.com/negocios/com-receita-de-r-2-bi-atlas-tenta-se-diferenciar-em-mercado-de-fogoes-cada-vez-mais-iguais/", "verificado_em": "2026-04-12"},
+        {"nome": "Robson Peixoto", "cargo": "diretor comercial", "fonte": "https://allconnected.media/atlas-nomeia-robson-peixoto-como-diretor-comercial/", "verificado_em": "2026-02-09"}
+      ]
+    },
+    "rex": {
+      "nota": "Genuinamente quieta: uma única matéria em 12 meses (RBA TV, 02/04/2026). A seção de notícias do site é endomarketing e está parada desde ~nov/2025. 'Transportes Rex' é outra empresa da mesma cidade.",
+      "paginas": [
+        {"nome": "RBA TV — Indústria em Foco", "tipo": "veículo regional", "url": "https://www.rbatv.com.br/industria-em-foco/"}
+      ],
+      "buscas": [
+        "\"Industrial Rex\" \"Braço do Trombudo\"",
+        "\"Industrial Rex\" (fixação OR parafusos OR metalmecânica) \"Alto Vale\""
+      ],
+      "pessoas": []
+    },
+    "neovia": {
+      "nota": "Sede em Curitiba; holding Silva & Bertoli, sócia da concessionária Caminhos da Serra Gaúcha (RS). Aparece como contratada do Dnit, muitas vezes em pauta de risco: contrato 027/2026 na BR-280/SC (Mafra–União da Vitória), alvo de inquérito do MPF em jul/2026; Consórcio Caminhos do MT na BR-163 (Sorriso–Sinop). 3ª no GPTW Paraná 2025, grandes empresas.",
+      "paginas": [
+        {"nome": "Caminhos da Serra Gaúcha — notícias (empresa do mesmo grupo)", "tipo": "sala de imprensa", "url": "https://www.csg.com.br/noticias"}
+      ],
+      "buscas": [
+        "Neovia (Dnit OR BR-280 OR BR-163 OR rodovia OR asfalto)",
+        "\"Silva & Bertoli\" OR \"Consórcio Caminhos do MT\"",
+        "Neovia GPTW Paraná"
+      ],
+      "pessoas": []
+    },
+    "tigre": {
+      "nota": "Adotou a marca institucional 'Grupo Tigre' nos 85 anos (03/08/2026). Muita manchete não traz o nome ('Gigante da construção civil abre 200 vagas em Joinville', ND Mais, 20/04/2026). Temas recorrentes: vagas, cultura de inovação, selo Pró-Ética, saneamento. Em SC, 'Tigre' também é o Criciúma.",
+      "paginas": [
+        {"nome": "Tigre na mídia", "tipo": "sala de imprensa", "url": "https://www.tigre.com.br/tigre-na-midia"},
+        {"nome": "Revista Anamaco", "tipo": "veículo setorial", "url": "https://www.revistaanamaco.com.br/"}
+      ],
+      "buscas": [
+        "\"Grupo Tigre\" Joinville",
+        "Tigre (vagas OR contrata OR fábrica OR saneamento) Joinville multinacional",
+        "\"Juliano Pereira\" Tigre"
+      ],
+      "pessoas": [
+        {"nome": "Luis Felipe Dau", "cargo": "CEO", "fonte": "https://www.infomoney.com.br/business/ceo-da-tigre-saneamento-irrigacao-construcao-e-eua-sao-as-avenidas-de-crescimento/", "verificado_em": "2025-12-15"},
+        {"nome": "Juliano Pereira", "cargo": "diretor de Pessoas, Sustentabilidade e Comunicação Interna (CHRO)", "fonte": "https://www.grupogestaorh.com.br/rhs-mais-admirados/pesquisarhs-segunda-fase/rhs-finalistas", "verificado_em": "2026"},
+        {"nome": "Klecios Souza", "cargo": "diretor executivo da Unidade de Negócios Brasil", "fonte": "https://www.tigre.com.br/tigre-na-midia/tigre-celebra-85-anos-e-adota-nova-marca-corporativa", "verificado_em": "2026-08-03"},
+        {"nome": "Fabrizio Tancredo", "cargo": "diretor executivo Jurídico & Compliance", "fonte": "https://www.revistaanamaco.com.br/tigre-conquista-selo-empresa-pro-etica-2026-da-controladoria-geral-da-uniao-", "verificado_em": "2026-07-22"}
+      ]
+    },
+    "familia-hansen": {
+      "nota": "Quieta de verdade: a família fala pouco e quase só por Felipe Hansen. A frase que sai na imprensa é 'Felipe Hansen, CEO do Grupo CRH / presidente do conselho da Tigre'. Esperado: 0 a 1 item por mês. 'Parque Hansen' é parque municipal, não é pauta.",
+      "paginas": [
+        {"nome": "Instituto Carlos Roberto Hansen — notícias", "tipo": "sala de imprensa", "url": "https://icrh.com.br/noticias/"}
+      ],
+      "buscas": [
+        "\"Felipe Hansen\" (Tigre OR CRH OR conselho OR Joinville)",
+        "\"família Hansen\" (Tigre OR \"Cidade das Águas\" OR \"family office\")"
+      ],
+      "pessoas": [
+        {"nome": "Felipe Hansen", "cargo": "presidente do conselho da Tigre e CEO do Grupo CRH", "fonte": "https://www.seudinheiro.com/2026/economia/controladora-da-tigre-empresa-de-tubos-e-conexoes-quer-construir-um-bairro-enorme-no-coracao-de-joinville-e-preve-r-72-bilhoes-em-vendas-davs/", "verificado_em": "2026-07-10"}
+      ]
+    },
+    "crh": {
+      "nota": "Holding e family office da família Hansen. O que dá notícia não sai com o nome CRH, e sim pelos empreendimentos: Cidade das Águas (bairro planejado de R$ 3 bi em Joinville, com a Hurbana) e Paraíso das Araucárias (Campo Alegre/SC). O feed do site foi retirado: só tinha o 'Olá, mundo!' de 2022.",
+      "paginas": [
+        {"nome": "Grupo CRH", "tipo": "sala de imprensa", "url": "https://grupocrh.com.br/"}
+      ],
+      "buscas": [
+        "\"Cidade das Águas\" Joinville",
+        "\"Paraíso das Araucárias\" \"Campo Alegre\"",
+        "\"Grupo CRH\" Joinville \"Danilo Conti\""
+      ],
+      "pessoas": [
+        {"nome": "Felipe Hansen", "cargo": "CEO do Grupo CRH", "fonte": "https://www.seudinheiro.com/2026/economia/controladora-da-tigre-empresa-de-tubos-e-conexoes-quer-construir-um-bairro-enorme-no-coracao-de-joinville-e-preve-r-72-bilhoes-em-vendas-davs/", "verificado_em": "2026-07-10"},
+        {"nome": "Danilo Conti", "cargo": "diretor do Grupo CRH e diretor-geral da Cidade das Águas", "fonte": "https://www.seudinheiro.com/2026/economia/controladora-da-tigre-empresa-de-tubos-e-conexoes-quer-construir-um-bairro-enorme-no-coracao-de-joinville-e-preve-r-72-bilhoes-em-vendas-davs/", "verificado_em": "2026-07-10"}
+      ]
+    },
+    "cantu": {
+      "nota": "Holding Cantu Store S.A. em Itajaí/SC (o grupo nasceu em Pato Branco/PR). B2B: fala com o mercado por lançamentos de marcas próprias (Speedmax, Gripmaster, Itaro), que a imprensa de pneus cobre. cantu.inc, pneustore.com.br e cantupneus.com.br recusam o nosso agente (403) — não contornar; o site de RI abre.",
+      "paginas": [
+        {"nome": "Cantu — RI, comunicados e fatos relevantes", "tipo": "sala de imprensa", "url": "https://ri.cantu.inc/comunicados-e-fatos-relevantes/"}
+      ],
+      "buscas": [
+        "\"Cantu Store\" OR \"Cantu Inc\" OR CantuStore",
+        "(Speedmax OR Gripmaster) pneus Cantu",
+        "\"Beto Cantu\" OR \"Humberto Cantu\""
+      ],
+      "pessoas": [
+        {"nome": "Humberto Gabriel (Beto) Cantu", "cargo": "CEO e fundador", "fonte": "https://ri.cantu.inc/governanca-corporativa/diretoria-e-conselho-de-administracao/", "verificado_em": "2026-09-30"},
+        {"nome": "Glauco Guimarães Ferreira", "cargo": "presidente do conselho de administração", "fonte": "https://ri.cantu.inc/governanca-corporativa/diretoria-e-conselho-de-administracao/", "verificado_em": "2026-09-30"}
+      ]
+    },
+    "rocha": {
+      "nota": "Matriz em Paranaguá/PR; unidades em Santos, São Francisco do Sul, Rio Grande, Itaqui e, desde jul/2026, Santana/AP. NÃO é quieta: saiu na Gazeta do Povo (23/09/2026, R$ 700 mi em Paranaguá) e na imprensa portuária. Sumia do jornal porque as manchetes dizem só 'Rocha'. O feed do site dava erro 500 em 30/09/2026 — testar de novo.",
+      "paginas": [
+        {"nome": "Rocha — News", "tipo": "sala de imprensa", "url": "https://www.rochalog.com.br/news/"},
+        {"nome": "Gazeta do Povo — Paraná", "tipo": "veículo regional", "url": "https://www.gazetadopovo.com.br/parana/"}
+      ],
+      "buscas": [
+        "Rocha Paranaguá terminal (grãos OR contêineres OR investimento)",
+        "\"Rocha Terminais\" OR rochalog",
+        "\"Darlan de David\" Rocha"
+      ],
+      "pessoas": [
+        {"nome": "Darlan Fábio De David", "cargo": "diretor-presidente (CEO)", "fonte": "https://www.gazetadopovo.com.br/parana/gigante-portuario-destravar-gargalo-na-exportacao-de-graos/", "verificado_em": "2026-09-23"}
+      ]
+    },
+    "skyfit": {
+      "nota": "Franqueadora em Americana/SP. Mudou de controle em mar/2026: grupo de Caio Peres (ex-XP) comprou a rede e ele virou CEO; meta de R$ 1 bi e 1.000 academias até 2030. Cobertura concentrada em imprensa de negócios (Brazil Journal, Seu Dinheiro, Money Report) e inaugurações locais espalhadas.",
+      "paginas": [
+        {"nome": "Money Report — Negócios", "tipo": "veículo setorial", "url": "https://www.moneyreport.com.br/negocios/"}
+      ],
+      "buscas": [
+        "Skyfit academias \"Caio Peres\"",
+        "Skyfit (inaugura OR nova unidade OR franquia) academia"
+      ],
+      "pessoas": [
+        {"nome": "Caio Peres", "cargo": "CEO desde mar/2026", "fonte": "https://www.moneyreport.com.br/negocios/skyfit-projeta-r-1-bilhao-em-faturamento-e-1-000-academias-ate-2030/", "verificado_em": "2026-09-03"},
+        {"nome": "Bruno Berardo", "cargo": "fundador e presidente do conselho", "fonte": "https://acadbrasil.com.br/pagina-informativo/acad-conexoes-sp-palestras-dinamicas-com-especialistas-de-peso/", "verificado_em": "2026-08-28"}
+      ]
+    },
+    "sicoob-cooplivre": {
+      "nota": "Sede em Capivari/SP; atende 20 cidades entre Capivari, Indaiatuba, Salto, Sorocaba e Jundiaí. Coberta quase só pela imprensa local de Capivari (98,7 Raízes FM e O Semanário, ambos na camada (e)), ~2 matérias por mês. Em 02/07/2026 criou o cargo de CEO (Rafael Kerche). GPTW há 4 anos seguidos.",
+      "paginas": [],
+      "buscas": [
+        "Cooplivre Capivari",
+        "\"Sicoob Cooplivre\" (Indaiatuba OR Salto OR Tietê OR Boituva OR Valinhos)"
+      ],
+      "pessoas": [
+        {"nome": "Arlindo Battaglin Junior", "cargo": "presidente do conselho de administração", "fonte": "https://www.raizesfm.com.br/2026/06/11/presidente-do-sicoob-cooplivre-participa-de-intercambio-na-london-business-school/", "verificado_em": "2026-06-11"},
+        {"nome": "Rafael Kerche", "cargo": "CEO (cargo criado em jul/2026)", "fonte": "https://www.jornalosemanario.com.br/sicoob-cooplivre-fortalece-sua-governanca-e-anuncia-nova-estrutura-executiva/", "verificado_em": "2026-07-02"}
+      ]
+    },
+    "sicoob-sul-serrano": {
+      "nota": "Sede em Venda Nova do Imigrante/ES; 15 municípios da região serrana, mais Cariacica e Vitória desde a incorporação do Sicoob Servidores (2024). A imprensa capixaba cobre a marca 'Sicoob ES' e quase nunca nomeia a cooperativa; quando nomeia, é numa lista padrão ('Sul-Litorâneo, Sul, Coopermais, Sul-Serrano...') que não é notícia dela. Não usar 'Venturim' sozinho: Bento Venturim preside o Sicoob Central ES.",
+      "paginas": [
+        {"nome": "Sistema OCB/ES — notícias", "tipo": "veículo setorial", "url": "https://portal.ocbes.coop.br/pt/publicacoes/noticias/"}
+      ],
+      "buscas": [
+        "\"Sicoob Sul-Serrano\" (Venda Nova OR cafeicultores OR produtores)",
+        "\"Cleto Venturim\" Sicoob"
+      ],
+      "pessoas": [
+        {"nome": "Cleto Venturim", "cargo": "presidente do conselho de administração", "fonte": "https://conexaosafra.com/cooperativismo/sicoob-sul-serrano-reforca-conexao-com-cafeicultores-em-nova-temporada/", "verificado_em": "2026-09-12"},
+        {"nome": "Giovane Bissoli", "cargo": "diretor executivo", "fonte": "https://conexaosafra.com/cooperativismo/sicoob-sul-serrano-reforca-conexao-com-cafeicultores-em-nova-temporada/", "verificado_em": "2026-09-12"},
+        {"nome": "Jair Luiz Trés Júnior", "cargo": "diretor de negócios", "fonte": "https://www.comunidadesicoob.com.br/sicoob-es-fortalece-governanca-e-cria-diretoria-para-apoiar-expansao-regional/", "verificado_em": "2026-08-05"}
+      ]
+    },
+    "brado": {
+      "nota": "O feed do site foi retirado em 30/09/2026 (só tinha o 'Olá, mundo!' de 2016), mas a página de imprensa está viva: publica, por exemplo, os relatórios semestrais de transparência salarial — pauta de gente.",
+      "paginas": [
+        {"nome": "Brado — Imprensa", "tipo": "sala de imprensa", "url": "https://www.brado.com.br/imprensa/"}
+      ],
+      "buscas": [],
+      "pessoas": []
+    }
+  }
+}

@@ -5,6 +5,7 @@
     python3 tools/teste_feeds.py
 """
 
+import json
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -187,6 +188,30 @@ def roda():
                                   "alcance_horas": 58, "parcial_aceito": True}}}
     confere("feed que não pagina (parcial conhecido) não gera alerta diário",
             feeds.alertas(hist4, "2026-09-23") == [])
+
+    # o registro real: nome único (é a chave da saúde) e sem feed de cliente parado
+    reg = json.loads((Path(__file__).resolve().parent.parent / "fontes" / "feeds.json").read_text(encoding="utf8"))
+    nomes = [f["nome"] for f in reg["feeds"]]
+    confere("nomes de feed únicos no registro", len(nomes) == len(set(nomes)),
+            str([n for n in nomes if nomes.count(n) > 1]))
+    confere("todo feed tem url https", all(f["url"].startswith("https://") for f in reg["feeds"]))
+    ctx = reg["contexto"]
+    for cid, manchete, casa_ou_nao in [
+        ("rocha", "Rocha investe R$ 700 milhões em terminal de Paranaguá", True),
+        ("rocha", "Almirante Rocha abre feira com terminais e indústria portuária", False),
+        ("atlas", "Dako lança cooktop de indução", True),
+        ("atlas", "Atlas geográfico ganha nova edição", False),
+        ("tigre", "Tigre vence em Joinville e segue na liderança", False),
+        ("crh", "Cidade das Águas: bairro planejado de Joinville sai do papel", True),
+        ("neovia", "MPF investiga obra da Neovia na BR-280", True),
+    ]:
+        confere("contexto real de %s: '%s…'" % (cid, manchete[:30]),
+                bool(feeds.casa_contexto(ctx[cid], manchete)) == casa_ou_nao)
+
+    # XML com quebra de linha antes do <?xml (visto no SIMPESC) ainda é feed
+    confere("feed com espaço antes do cabeçalho XML é lido",
+            len(feeds.ler_feed(b"\n<?xml version='1.0'?><rss><channel><item><title>A</title>"
+                               b"<link>https://x/a</link></item></channel></rss>")) == 1)
 
     # feed parado desde o cadastro: avisa na primeira noite, não todas as noites
     velho = {"status": "ok", "na_janela": 0, "alcancou_janela": True, "mais_novo_horas": 41000}

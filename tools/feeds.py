@@ -137,6 +137,9 @@ def ler_feed(conteudo):
     Levanta ValueError se o conteúdo não for um feed."""
     if isinstance(conteudo, str):
         conteudo = conteudo.encode("utf-8")
+    # Plugins de WordPress às vezes soltam uma linha em branco antes do <?xml,
+    # e o parser recusa o documento inteiro por isso.
+    conteudo = conteudo.lstrip()
     try:
         raiz = ET.fromstring(conteudo)
     except ET.ParseError as e:
@@ -318,7 +321,7 @@ def candidatos(lidos, clientes, termos_cfg, inicio, fim, publicadas, contexto=No
                     "url": it.get("url", "").strip(),
                     "data": quando.astimezone(TZ).date().isoformat(),
                     "publicado_em": quando.astimezone(TZ).isoformat(timespec="minutes"),
-                    "fonte": feed["nome"],
+                    "fonte": feed.get("veiculo") or feed["nome"],
                     "trecho": (it["resumo"] or it["corpo"])[:TRECHO_MAX],
                     "tipo": "propria" if feed.get("cliente") else "setorial",
                     "onde": onde,
