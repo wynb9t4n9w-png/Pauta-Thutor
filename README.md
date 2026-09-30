@@ -282,6 +282,46 @@ nome dele no título — ficou fora de uma edição em que aquele cliente ainda
 tinha vaga. É aviso, não falha: a coleta pode ter motivo para descartar, mas
 precisa olhar.
 
+## Qualidade editorial — o estudo de 30/09/2026
+
+Sete edições (24 a 30/09) foram medidas item a item. A integridade está
+ótima: nenhum link inventado, todas as datas dentro da janela e 98% dos itens
+de empresa, gente e risco citam o cliente no texto da matéria. Os problemas
+eram de **relevância**, não de veracidade:
+
+| Achado | Medida | O que mudou |
+|---|---|---|
+| A busca afrouxou depois dos feeds | 146 e 117 buscas em 29–30/09 (vinham perto de 400) | aviso abaixo de 5 buscas por cliente; subagentes (a)–(d) saem antes e a camada (e) roda em paralelo — ela **soma**, não substitui |
+| Conteúdo de serviço ocupando vaga | 21% dos itens; ASN com 9 de 20 candidatos fracos | rubrica "o que é notícia para a Thutor" no prompt; candidato do próprio feed só é **forte** com o nome no título ou pauta de gente, risco ou estratégia |
+| Mesma matéria duas vezes | URL com acento codificado; release republicado com título idêntico | `url_canonica`; título idêntico em 10 dias **reprova**; pauta parecida gera aviso |
+| Nomes curtos ambíguos | Tigre, Atlas, Rex, Brado, Rocha… | bloco `contexto` no `feeds.json`: o nome curto só conta com uma palavra do setor |
+| Concentração | Sistema S = 65% dos itens | "4 por cliente é teto, não meta" |
+| eixos não pagina | `?paged=2` devolve a página 1 | `"paginavel": false` |
+
+### Peças novas
+
+- `tools/texto.py` — normalização, URL canônica e semelhança de títulos
+  (média de SequenceMatcher e Jaccard; limiar 0,5, calibrado no histórico de
+  11 a 30/09). Validador e camada (e) comparam do mesmo jeito.
+- Camada (e) marca cada candidato com `nome_no_titulo`, `pauta`
+  (risco, gente, estrategia, geral, servico) e `parecido_com`, e descarta o
+  que repete título de edição recente. Feeds próprios ganharam `marca`
+  ("Sebrae" na ASN, "Gazin" no Jeito Gazin…).
+- Validador: reprova título idêntico do mesmo cliente em 10 dias; avisa pauta
+  repetida, esforço de busca baixo e candidato forte que ficou de fora.
+
+### Boletim de qualidade
+
+```bash
+python3 tools/qualidade.py pauta-thutor.html --dias 7 [--links]
+```
+
+Itens por edição (segunda à parte), clientes e veículos distintos, clientes
+sem nenhum item, gente/risco por edição, % de conteúdo de serviço, % Sistema S,
+buscas, itens por camada e pares de pauta repetida. Com `--links`, confere o
+status HTTP de cada link e se a matéria cita o cliente. Termina com os
+"pontos de atenção". Rode de vez em quando: é o termômetro da coleta.
+
 ## Por que existe um validador
 
 Em 29/08/2026 o disparo automático terminou em **56 segundos**. Não pesquisou

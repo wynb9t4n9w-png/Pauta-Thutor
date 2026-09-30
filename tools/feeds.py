@@ -48,13 +48,13 @@ sobre o cliente, classifica a editoria e escreve o resumo.
 """
 
 import argparse
+from collections import Counter
 import html
 import json
 import re
 import subprocess
 import sys
 import time
-import unicodedata
 import urllib.error
 import urllib.request
 import urllib.robotparser
@@ -65,6 +65,10 @@ from pathlib import Path
 from urllib.parse import urlparse
 from zoneinfo import ZoneInfo
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from texto import (LIMIAR_REPETICAO, mesmo_titulo, normaliza,  # noqa: E402,F401
+                   semelhanca, url_canonica)
+
 TZ = ZoneInfo("America/Sao_Paulo")
 RAIZ = Path(__file__).resolve().parent.parent
 REGISTRO_PADRAO = RAIZ / "fontes" / "feeds.json"
@@ -72,6 +76,7 @@ TOKEN_ROBOTS = "PautaThutor"
 TEMPO_LIMITE = 25
 PAUSA_MESMO_SITE = 0.8
 HISTORICO_DIAS = 60
+DIAS_REPETICAO = 10
 TRECHO_MAX = 400
 
 NS = {
@@ -103,12 +108,6 @@ def ler_data(txt):
 def sem_html(txt):
     txt = re.sub(r"<[^>]+>", " ", txt or "")
     return re.sub(r"\s+", " ", html.unescape(txt)).strip()
-
-
-def normaliza(txt):
-    """Minúsculas e sem acento, para 'Sebrae Pará' casar com 'SEBRAE PARA'."""
-    txt = unicodedata.normalize("NFD", (txt or "").lower())
-    return "".join(c for c in txt if unicodedata.category(c) != "Mn")
 
 
 def _padrao(termo):
@@ -169,8 +168,50 @@ def ler_feed(conteudo):
     return itens
 
 
-def url_canonica(u):
-    return (u or "").strip().split("#")[0].rstrip("/")
+# ------------------------------------------------------------ pauta
+
+# Sinal, não filtro: ajuda a coleta a pôr na frente o que um consultor de
+# cultura e gestão usaria numa conversa com o cliente. A decisão final é dela.
+# Ordem de precedência: risco, gente, estratégia, serviço, geral.
+PAUTAS = [
+    ("risco", ["processo judicial", "acao judicial", "justica", "liminar", "multa", "multada",
+               "multado", "autuada", "autuado", "investigacao", "investigado", "investigada",
+               "denuncia", "denunciado", "denunciada", "acidente", "morte", "greve", "crise",
+               "prejuizo", "rombo", "fraude", "recuperacao judicial", "falencia", "irregularidade",
+               "irregularidades", "condenada", "condenado", "indenizacao", "ministerio publico",
+               "policia federal", "cpi", "procon", "apagao"]),
+    ("gente", ["nomeia", "nomeado", "nomeada", "nomeacao", "assume", "posse", "empossado",
+               "presidente", "diretor", "diretora", "diretoria", "conselho de administracao", "ceo",
+               "executivo", "executiva", "lideranca", "liderancas", "sucessao", "sucessor",
+               "colaboradores", "funcionarios", "empregados", "trabalhadores", "contrata",
+               "contratacao", "contratacoes", "demite", "demissao", "demissoes", "layoff",
+               "trainee", "processo seletivo", "concurso", "cultura organizacional",
+               "clima organizacional", "gptw", "great place to work",
+               "melhores empresas para trabalhar", "diversidade", "inclusao", "inclusivas",
+               "pcd", "equidade", "saude mental", "bem-estar", "bem estar", "transparencia salarial",
+               "remuneracao", "plr", "universidade corporativa", "academy"]),
+    ("estrategia", ["investimento", "investimentos", "investe", "investira", "aporte", "aquisicao",
+                    "adquire", "fusao", "incorporacao", "joint venture", "parceria", "acordo",
+                    "expansao", "expande", "inaugura", "inauguracao", "nova unidade", "novas unidades",
+                    "fabrica", "resultado", "resultados", "lucro", "receita", "faturamento", "balanco",
+                    "trimestre", "dividendos", "jcp", "ipo", "debentures", "reestruturacao",
+                    "reorganizacao", "plano estrategico", "bilhao", "bilhoes", "ranking", "recorde",
+                    "leilao", "concessao", "licitacao", "franquia", "franquias"]),
+    ("servico", ["dica", "dicas", "saiba", "confira", "veja", "entenda", "como", "passo a passo",
+                 "guia", "orienta", "orientacoes", "aprenda", "descubra", "ajuda", "pode", "podem",
+                 "exigem", "tendencia", "tendencias", "inscricoes", "inscreva", "gratuito", "gratuita",
+                 "gratuitas", "gratuitos", "curso", "oficina", "palestra", "webinar", "live"]),
+]
+
+
+def classifica_pauta(titulo, trecho=""):
+    """Tema provável do item, pelo título; o trecho só desempata o que o título
+    não diz. 'geral' quando nada se destaca."""
+    for texto_ in (titulo, trecho):
+        for nome, gatilhos in PAUTAS:
+            if casa(gatilhos, texto_):
+                return nome
+    return "geral"
 
 
 # ------------------------------------------------------------ carteira
@@ -183,7 +224,19 @@ def termos_do(cliente, termos_cfg):
     return [t for t in (cliente.get("nome"), cliente.get("razao")) if t and len(t) >= 4]
 
 
-def candidatos(lidos, clientes, termos_cfg, inicio, fim, publicadas):
+def casa_contexto(ctx, topo):
+    """Nome ambíguo ('Tigre', 'Atlas', 'Rex') só vale acompanhado de uma palavra
+    do ramo do cliente na mesma manchete ou trecho. Devolve o termo, ou None."""
+    if not ctx:
+        return None
+    nome = casa(ctx.get("nome") or [], topo)
+    if not nome:
+        return None
+    junto = casa(ctx.get("com") or [], topo)
+    return "%s (+%s)" % (nome, junto) if junto else None
+
+
+def candidatos(lidos, clientes, termos_cfg, inicio, fim, publicadas, contexto=None, recentes=None):
     """Cruza os itens lidos com a carteira.
 
     lidos: [(feed, [itens])]. Feed com 'cliente' é sala de imprensa própria: todo
@@ -193,7 +246,11 @@ def candidatos(lidos, clientes, termos_cfg, inicio, fim, publicadas):
     """
     ativos = {c["id"]: c for c in clientes if c.get("ativo") is not False}
     termos = {cid: termos_do(c, termos_cfg) for cid, c in ativos.items()}
+    contexto = contexto or {}
+    recentes = recentes or {}
+    publicadas = {url_canonica(u) for u in publicadas}
     saida, vistos = [], set()
+    repetidos = 0
 
     for feed, itens in lidos:
         for it in itens:
@@ -219,6 +276,12 @@ def candidatos(lidos, clientes, termos_cfg, inicio, fim, publicadas):
                     if not t:
                         t, onde = casa(termos[cid], it["resumo"]), "resumo"
                     if not t:
+                        ctx = casa_contexto(contexto.get(cid), topo)
+                        if ctx:
+                            nome_ctx = ctx.split(" (+")[0]
+                            t = ctx
+                            onde = "titulo" if casa([nome_ctx], it["titulo"]) else "resumo"
+                    if not t:
                         t, onde = casa(termos[cid], it["corpo"]), "corpo"
                     if t:
                         achados.append((cid, onde, t))
@@ -227,6 +290,21 @@ def candidatos(lidos, clientes, termos_cfg, inicio, fim, publicadas):
                 if (cid, url) in vistos:
                     continue
                 vistos.add((cid, url))
+                # A mesma pauta já publicada por outro caminho: título idêntico
+                # é a mesma matéria e sai daqui; parecido fica, mas marcado.
+                parecido = None
+                for data_ant, tit_ant in recentes.get(cid, []):
+                    if mesmo_titulo(it["titulo"], tit_ant):
+                        parecido = "identico"
+                        break
+                    if semelhanca(it["titulo"], tit_ant) >= LIMIAR_REPETICAO:
+                        parecido = {"data": data_ant, "titulo": tit_ant}
+                        break
+                if parecido == "identico":
+                    repetidos += 1
+                    continue
+                marca = feed.get("marca")
+                nome_no_titulo = bool(casa(termos[cid] + ([marca] if marca else []), it["titulo"]))
                 saida.append({
                     "cliente_id": cid,
                     "cliente": ativos[cid].get("nome", cid),
@@ -239,10 +317,16 @@ def candidatos(lidos, clientes, termos_cfg, inicio, fim, publicadas):
                     "tipo": "propria" if feed.get("cliente") else "setorial",
                     "onde": onde,
                     "termo": termo,
+                    "nome_no_titulo": nome_no_titulo,
+                    "pauta": classifica_pauta(it["titulo"], it["resumo"]),
+                    **({"parecido_com": parecido} if parecido else {}),
                 })
 
     peso = {"feed_proprio": 0, "titulo": 1, "resumo": 2, "corpo": 3}
-    saida.sort(key=lambda c: (peso[c["onde"]], c["cliente"], c["publicado_em"]), reverse=False)
+    ordem_pauta = {"risco": 0, "gente": 1, "estrategia": 2, "geral": 3, "servico": 4}
+    saida.sort(key=lambda c: (bool(c.get("parecido_com")), peso[c["onde"]],
+                              ordem_pauta[c["pauta"]], c["cliente"], c["publicado_em"]))
+    candidatos.repetidos = repetidos
     return saida
 
 
@@ -435,6 +519,7 @@ def main():
     estado = carrega_estado(a.estado)
     registro = json.loads(Path(a.registro).read_text(encoding="utf8"))
     termos_cfg = {k: v for k, v in (registro.get("termos") or {}).items() if not k.startswith("_")}
+    contexto = {k: v for k, v in (registro.get("contexto") or {}).items() if not k.startswith("_")}
 
     fim = datetime.fromisoformat(a.ate) if a.ate else datetime.now(TZ)
     if fim.tzinfo is None:
@@ -446,6 +531,12 @@ def main():
     # ela vai ser substituída.
     publicadas = {url_canonica(i.get("url")) for e in estado.get("edicoes") or []
                   if e.get("data", "") < hoje for i in e.get("itens") or []}
+    limite = (fim.astimezone(TZ).date() - timedelta(days=DIAS_REPETICAO)).isoformat()
+    recentes = {}
+    for e in estado.get("edicoes") or []:
+        if limite <= e.get("data", "") < hoje:
+            for i in e.get("itens") or []:
+                recentes.setdefault(i.get("cliente_id"), []).append((e["data"], i.get("titulo") or ""))
 
     leitor = Leitor(registro.get("agente") or "PautaThutor/1.0")
     lidos, saude = [], {}
@@ -455,7 +546,8 @@ def main():
         if itens:
             lidos.append((feed, itens))
 
-    cands = candidatos(lidos, estado.get("clientes") or [], termos_cfg, inicio, fim, publicadas)
+    cands = candidatos(lidos, estado.get("clientes") or [], termos_cfg, inicio, fim, publicadas,
+                       contexto, recentes)
     cobertos = sorted({urlparse(f["url"]).netloc.lower().removeprefix("www.")
                        for f in registro["feeds"] if saude[f["nome"]]["status"] == "ok"})
 
@@ -478,7 +570,13 @@ def main():
     for nome in sorted(por_cliente, key=lambda n: -len(por_cliente[n])):
         lst = por_cliente[nome]
         tipos = sorted({c["onde"] for c in lst})
-        print("  %-24s %3d  (%s)" % (nome, len(lst), ", ".join(tipos)))
+        pautas = ", ".join("%s %d" % (p, n) for p, n in
+                           sorted(Counter(c["pauta"] for c in lst).items(), key=lambda x: -x[1]))
+        print("  %-24s %3d  (%s · %s)" % (nome, len(lst), ", ".join(tipos), pautas))
+    parecidos = sum(1 for c in cands if c.get("parecido_com"))
+    if parecidos or getattr(candidatos, "repetidos", 0):
+        print("  repetição: %d descartados por título idêntico a edição recente, %d marcados como parecidos"
+              % (getattr(candidatos, "repetidos", 0), parecidos))
 
     avisos = registra_saude(a.saude, hoje, saude) if a.saude else []
     if avisos:

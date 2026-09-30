@@ -42,6 +42,9 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from texto import LIMIAR_REPETICAO, mesmo_titulo, semelhanca, url_canonica  # noqa: E402
+
 TZ = ZoneInfo("America/Sao_Paulo")
 EDITORIAS = {"empresa", "setor", "gente", "risco"}
 TENDENCIAS = {"alta", "baixa", "estavel"}
@@ -52,6 +55,13 @@ DURACAO_MINIMA_S = 120
 # são horas de folga, e execuções de 5 minutos vêm rendendo menos que as de 15.
 DURACAO_CONFORTAVEL_S = 480
 MAX_ITENS_POR_CLIENTE = 4
+# Esforço mínimo esperado de busca, por cliente ativo. Nas duas primeiras noites
+# com a camada (e), 29 e 30/09/2026, as buscas caíram de ~400 para 146 e 117: a
+# rotina deu os feeds por suficientes e encurtou as camadas (a) a (d), que são as
+# únicas que alcançam os clientes sem feed. Abaixo disto, aviso.
+BUSCAS_POR_CLIENTE = 5
+# Quantos dias para trás a mesma pauta conta como repetida.
+DIAS_REPETICAO = 10
 JANELA_DIAS = 7  # notícia muito antiga indica coleta preguiçosa ou data inventada
 
 falhas: list[str] = []
@@ -142,10 +152,12 @@ def valida(estado: dict) -> None:
                 f"apenas {buscas} buscas para {len(ativos)} clientes ativos — "
                 "menos de uma por cliente. O PASSO 2 foi pulado."
             )
-        elif buscas < 2 * len(ativos):
+        elif buscas < BUSCAS_POR_CLIENTE * len(ativos):
             aviso(
-                f"{buscas} buscas para {len(ativos)} clientes: a camada (b), de varredura na "
-                "grande imprensa, provavelmente não foi feita para todos."
+                f"{buscas} buscas para {len(ativos)} clientes (esperado: pelo menos "
+                f"{BUSCAS_POR_CLIENTE * len(ativos)}). A camada (e) soma, não substitui: os "
+                "clientes sem feed só são alcançados pelas camadas (a) a (d). Em 29 e 30/09 "
+                "as buscas caíram para 146 e 117 e a editoria gente caiu para 1 item."
             )
 
         # A segunda passada é sobre ESFORÇO, não sobre resultado: um dia quieto
@@ -196,11 +208,21 @@ def valida(estado: dict) -> None:
     setor_por_cliente: dict[str, int] = {}
 
     urls_antigas = {
-        it.get("url")
+        url_canonica(it.get("url"))
         for antiga in edicoes[1:]
         for it in (antiga.get("itens") or [])
         if it.get("url")
     }
+    # Títulos recentes, por cliente, para achar a mesma pauta por outro caminho.
+    recentes: dict[str, list[tuple[str, str]]] = {}
+    for antiga in edicoes[1:]:
+        dd = quando(antiga.get("data"))
+        if dd is None or (hoje - dd.date()).days > DIAS_REPETICAO:
+            continue
+        for it in antiga.get("itens") or []:
+            recentes.setdefault(it.get("cliente_id"), []).append(
+                (antiga.get("data"), it.get("titulo") or ""))
+    parecidos: list[str] = []
 
     for i, it in enumerate(itens):
         onde = f"item {i + 1}"
@@ -216,9 +238,23 @@ def valida(estado: dict) -> None:
         if not url.startswith(("http://", "https://")):
             falha(f"{onde}: url ausente ou inválida ('{url}').")
         else:
-            vistos_agora[url] = vistos_agora.get(url, 0) + 1
-            if url in urls_antigas:
+            canon = url_canonica(url)
+            vistos_agora[canon] = vistos_agora.get(canon, 0) + 1
+            if canon in urls_antigas:
                 falha(f"{onde}: url já publicada numa edição anterior — {url}")
+
+        # A mesma pauta por outro caminho: título idêntico é a mesma matéria
+        # (republicada por outro veículo, ou com a url escrita de outro jeito);
+        # título muito parecido pede um olhar — só entra se for desdobramento.
+        titulo = it.get("titulo") or ""
+        for data_ant, tit_ant in recentes.get(cid, []):
+            if mesmo_titulo(titulo, tit_ant):
+                falha(f"{onde}: a mesma matéria já saiu em {data_ant} com o título idêntico "
+                      f"('{titulo[:70]}'). Tire-a da edição.")
+                break
+            if semelhanca(titulo, tit_ant) >= LIMIAR_REPETICAO:
+                parecidos.append(f"'{titulo[:55]}' ≈ '{tit_ant[:55]}' ({data_ant})")
+                break
 
         d = quando(it.get("data"))
         if d is None:
@@ -238,6 +274,13 @@ def valida(estado: dict) -> None:
     for url, n in vistos_agora.items():
         if n > 1:
             falha(f"a mesma url aparece {n} vezes nesta edição — {url}")
+
+    if parecidos:
+        aviso(
+            f"{len(parecidos)} item(ns) repetem pauta dos últimos {DIAS_REPETICAO} dias: "
+            + "; ".join(parecidos[:6]) + (f" (e mais {len(parecidos) - 6})" if len(parecidos) > 6 else "")
+            + ". Mantenha só se houver fato novo; senão, tire."
+        )
 
     for cid, n in por_cliente.items():
         if n > MAX_ITENS_POR_CLIENTE:
@@ -327,6 +370,24 @@ def valida_abertura(ed: dict) -> None:
             )
 
 
+def candidato_forte(c: dict) -> bool:
+    """O que a coleta não deveria deixar de fora sem motivo.
+
+    Até 30/09/2026 todo item da sala de imprensa do cliente contava como forte,
+    e o aviso empurrava a rotina a preencher as 4 vagas de cada Sebrae com o que
+    a agência publicasse — inclusive dica de Instagram para chef de cozinha. Agora
+    conta só o que nomeia o cliente na manchete, ou que a camada (e) reconheceu
+    como pauta de gente, risco ou estratégia. E nada que repita pauta recente.
+    """
+    if c.get("parecido_com"):
+        return False
+    if c.get("onde") == "titulo":
+        return True
+    if c.get("onde") == "feed_proprio":
+        return bool(c.get("nome_no_titulo")) or c.get("pauta") in ("gente", "risco", "estrategia")
+    return False
+
+
 def confere_recall(estado: dict, caminho: Path) -> None:
     """Candidato forte que ficou de fora com vaga sobrando é perda de recall.
 
@@ -342,16 +403,16 @@ def confere_recall(estado: dict, caminho: Path) -> None:
         return
     ed = (estado.get("edicoes") or [{}])[0]
     itens = ed.get("itens") or []
-    urls = {(i.get("url") or "").rstrip("/") for i in itens}
+    urls = {url_canonica(i.get("url")) for i in itens}
     por_cliente: dict[str, int] = {}
     for i in itens:
         por_cliente[i.get("cliente_id")] = por_cliente.get(i.get("cliente_id"), 0) + 1
 
     fora = []
     for c in dados.get("candidatos") or []:
-        if c.get("onde") not in ("feed_proprio", "titulo"):
+        if not candidato_forte(c):
             continue
-        if (c.get("url") or "").rstrip("/") in urls:
+        if url_canonica(c.get("url")) in urls:
             continue
         if por_cliente.get(c.get("cliente_id"), 0) >= MAX_ITENS_POR_CLIENTE:
             continue

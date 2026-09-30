@@ -90,6 +90,11 @@ def abertura(**troca) -> dict:
     }
 
 
+def item(cid: str, url: str, titulo: str, data: str | None = None) -> dict:
+    return {"cliente_id": cid, "editoria": "empresa", "titulo": titulo, "resumo": "",
+            "fonte": "Veículo", "url": url, "data": data or hoje.isoformat()}
+
+
 def url_repetida() -> dict:
     it = lambda cid: {  # noqa: E731
         "cliente_id": cid, "editoria": "empresa", "titulo": "T", "resumo": "",
@@ -150,6 +155,49 @@ CASOS = [
         {**base(), "edicoes": [edicao(clientes_silenciosos=0, segunda_passada_buscas=None)]},
         0,
     ),
+    # --- a mesma pauta por outro caminho (estudo de 30/09/2026) --------------
+    (
+        "mesma url com acento codificado já publicada ontem",
+        {**base(), "edicoes": [
+            {**edicao(0), "itens": [item("c1", "https://sesc.df/corrida-do-comerci%C3%A1rio/", "Corrida")]},
+            {**edicao(0), "data": (hoje - timedelta(days=1)).isoformat(),
+             "itens": [item("c1", "https://sesc.df/corrida-do-comerciário", "Corrida",
+                            (hoje - timedelta(days=1)).isoformat())]},
+        ]},
+        1,
+    ),
+    (
+        "mesmo título, outro veículo, 3 dias antes",
+        {**base(), "edicoes": [
+            {**edicao(0), "itens": [item("c1", "https://jornal.com/forum", "Fórum de Negócios conecta empresas a novos mercados")]},
+            {**edicao(0), "data": (hoje - timedelta(days=3)).isoformat(),
+             "itens": [item("c1", "https://agencia.com/forum", "Fórum de Negócios conecta empresas a novos mercados",
+                            (hoje - timedelta(days=3)).isoformat())]},
+        ]},
+        1,
+    ),
+    (
+        "mesmo título há 20 dias não é repetição",
+        {**base(), "edicoes": [
+            {**edicao(0), "itens": [item("c1", "https://jornal.com/forum2", "Fórum de Negócios conecta empresas a novos mercados")]},
+            {**edicao(0), "data": (hoje - timedelta(days=20)).isoformat(),
+             "itens": [item("c1", "https://agencia.com/forum2", "Fórum de Negócios conecta empresas a novos mercados",
+                            (hoje - timedelta(days=20)).isoformat())]},
+        ]},
+        0,
+    ),
+    (
+        "pauta parecida é aviso, não falha",
+        {**base(), "edicoes": [
+            {**edicao(0), "itens": [item("c1", "https://a.com/1", "Assembleia elege Elisa Bastos para diretoria da CCEE")]},
+            {**edicao(0), "data": (hoje - timedelta(days=1)).isoformat(),
+             "itens": [item("c1", "https://b.com/1", "Em Assembleia, agentes da CCEE elegem Elisa Bastos como nova diretora",
+                            (hoje - timedelta(days=1)).isoformat())]},
+        ]},
+        0,
+    ),
+    ("esforço de busca baixo é aviso, não falha", {**base(), "edicoes": [edicao(buscas=100)]}, 0),
+
     # --- faixa de abertura: opcional, mas íntegra quando vem ----------------
     (
         "abertura completa (tempo + mercado)",
@@ -248,9 +296,11 @@ def main() -> None:
                 print("     " + (r.stdout or r.stderr).strip().replace("\n", "\n     "))
 
     # --- recall contra os candidatos da camada (e) --------------------------
-    def cand(cliente_id, url, onde="feed_proprio"):
-        return {"cliente_id": cliente_id, "cliente": cliente_id.upper(), "url": url,
-                "titulo": f"Pauta de {cliente_id}", "onde": onde}
+    def cand(cliente_id, url, onde="feed_proprio", **extra):
+        c = {"cliente_id": cliente_id, "cliente": cliente_id.upper(), "url": url,
+             "titulo": f"Pauta de {cliente_id}", "onde": onde, "nome_no_titulo": True}
+        c.update(extra)
+        return c
 
     cheio = {**edicao(0), "itens": [
         {"cliente_id": "c1", "editoria": "empresa", "titulo": f"T{k}", "resumo": "",
@@ -265,6 +315,12 @@ def main() -> None:
          [cheio], [cand("c1", "https://feed.com/2")], False),
         ("recall: menção só no corpo não cobra -> sem aviso",
          [edicao(3)], [cand("c9", "https://feed.com/3", onde="corpo")], False),
+        ("recall: pauta da agência sem o nome e sem tema forte não cobra",
+         [edicao(3)], [cand("c9", "https://feed.com/4", nome_no_titulo=False, pauta="servico")], False),
+        ("recall: pauta da agência sem o nome mas de gente cobra",
+         [edicao(3)], [cand("c9", "https://feed.com/5", nome_no_titulo=False, pauta="gente")], True),
+        ("recall: candidato que repete pauta recente não cobra",
+         [edicao(3)], [cand("c9", "https://feed.com/6", parecido_com={"data": "x", "titulo": "y"})], False),
     ]
     with tempfile.TemporaryDirectory() as tmp:
         for nome, eds, cands, espera_aviso in RECALL:

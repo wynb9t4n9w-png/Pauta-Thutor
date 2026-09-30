@@ -145,6 +145,44 @@ def roda():
     confere("alerta quando o feed não alcança a janela",
             any("não alcançou" in a for a in feeds.alertas(hist3, "2026-09-23")))
 
+    # --- estudo de qualidade de 30/09/2026 -----------------------------------
+    ctx_tigre = {"nome": ["Tigre"], "com": ["Joinville", "tubos", "Hansen"]}
+    confere("nome ambíguo com palavra do ramo casa",
+            feeds.casa_contexto(ctx_tigre, "Tigre amplia fábrica em Joinville") == "Tigre (+Joinville)")
+    confere("nome ambíguo sem palavra do ramo não casa",
+            feeds.casa_contexto(ctx_tigre, "Tigre-de-bengala nasce no zoológico") is None)
+
+    for titulo, esperado in [
+        ("Presidente da CCEE assume conselho internacional", "gente"),
+        ("Brasília recebe encontro de lideranças do Sesc", "gente"),
+        ("Liminar impede CCEE de efetivar desligamento da Electra", "risco"),
+        ("Gazin inaugura loja em Acará e supera meta", "estrategia"),
+        ("Análise gratuita do Instagram ajuda chef de cozinha a conquistar clientes", "servico"),
+        ("Rota Tempo das Águas revela encantos de Santarém", "geral"),
+    ]:
+        confere("pauta de '%s…' é %s" % (titulo[:32], esperado), feeds.classifica_pauta(titulo) == esperado,
+                feeds.classifica_pauta(titulo))
+
+    asn = {"nome": "ASN Pará", "cliente": "sebrae-pa", "marca": "Sebrae"}
+    def it(titulo, url, horas=5):
+        return {"titulo": titulo, "url": url, "resumo": "", "corpo": "", "publicado": FIM - timedelta(hours=horas)}
+    recentes = {"sebrae-pa": [("2026-09-22", "Sebrae promove feira de negócios em Belém"),
+                              ("2026-09-22", "Circuito Conexão Financeira chega a Belém e Ananindeua")]}
+    c3 = feeds.candidatos([(asn, [
+        it("Sebrae promove feira de negócios em Belém", "https://pa.x/republicada"),
+        it("Circuito Conexão Financeira chega a Marabá e Parauapebas", "https://pa.x/parecida"),
+        it("Sebrae nomeia nova superintendente no Pará", "https://pa.x/nova"),
+        it("Dicas para vender mais no Círio", "https://pa.x/dica"),
+    ])], CLIENTES, TERMOS, INICIO, FIM, set(), recentes=recentes)
+    urls3 = {x["url"].rsplit("/", 1)[-1]: x for x in c3}
+    confere("título idêntico a edição recente é descartado", "republicada" not in urls3, str(list(urls3)))
+    confere("título parecido fica, mas marcado", "parecido_com" in urls3.get("parecida", {}))
+    confere("marca da sala de imprensa conta como nome no título", urls3.get("nova", {}).get("nome_no_titulo") is True)
+    confere("pauta de gente reconhecida no candidato", urls3.get("nova", {}).get("pauta") == "gente")
+    confere("dica sem o nome do cliente não conta como nome no título",
+            urls3.get("dica", {}).get("nome_no_titulo") is False and urls3.get("dica", {}).get("pauta") == "servico")
+    confere("parecido vai para o fim da fila", c3[-1]["url"].endswith("parecida"), str([x["url"] for x in c3]))
+
     hist4 = {"2026-09-23": {"Z": {"status": "ok", "na_janela": 4, "alcancou_janela": False,
                                   "alcance_horas": 58, "parcial_aceito": True}}}
     confere("feed que não pagina (parcial conhecido) não gera alerta diário",
