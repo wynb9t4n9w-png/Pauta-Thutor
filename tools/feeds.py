@@ -76,6 +76,12 @@ TOKEN_ROBOTS = "PautaThutor"
 TEMPO_LIMITE = 25
 PAUSA_MESMO_SITE = 0.8
 HISTORICO_DIAS = 60
+# Feed cujo item MAIS NOVO tem mais que isto está parado: o editor deixou de
+# publicar por ele. Em 30/09/2026 três feeds do registro estavam assim desde o
+# cadastro (Brado, Grupo CRH e ABAC, com o último item de 2016, 2022 e 2022)
+# e nenhum alerta disparou, porque os alertas só comparavam uma noite com as
+# anteriores — e um feed que nunca rendeu não "passa a falhar" nem "seca".
+PARADO_DIAS = 90
 DIAS_REPETICAO = 10
 TRECHO_MAX = 400
 
@@ -442,6 +448,9 @@ def ler(feed, leitor, inicio, agora):
                 break
 
     saude["itens_lidos"] = len(itens)
+    datas = [i["publicado"] for i in itens if i["publicado"]]
+    if datas:
+        saude["mais_novo_horas"] = round((agora - max(datas)).total_seconds() / 3600, 1)
     saude["na_janela"] = sum(1 for i in itens if i["publicado"] and inicio <= i["publicado"] <= agora)
     if fundo is not None:
         saude["alcance_horas"] = round((agora - fundo).total_seconds() / 3600, 1)
@@ -452,6 +461,10 @@ def ler(feed, leitor, inicio, agora):
 
 
 # ------------------------------------------------------------ saúde
+
+def parado(reg):
+    return reg.get("mais_novo_horas", 0) > PARADO_DIAS * 24
+
 
 def alertas(historico, hoje):
     """Mudanças que merecem atenção, comparando hoje com os dias anteriores."""
@@ -466,6 +479,10 @@ def alertas(historico, hoje):
         if reg["status"] == "ok" and not reg.get("alcancou_janela") and not reg.get("parcial_aceito"):
             avisos.append("%s não alcançou o início da janela: cobre %.0f h. Suba paginas_max."
                           % (nome, reg.get("alcance_horas", 0)))
+        if reg["status"] == "ok" and parado(reg) and not (antes and parado(antes[-1])):
+            avisos.append("%s está parado: o item mais novo do feed tem %d dias. O editor não publica "
+                          "mais por ele — troque o endereço ou tire o feed de fontes/feeds.json."
+                          % (nome, reg["mais_novo_horas"] // 24))
         rendeu = [r.get("na_janela", 0) for r in antes if r.get("status") == "ok"]
         if reg["status"] == "ok" and reg.get("na_janela", 0) == 0 and len(rendeu) >= 3 and sum(rendeu) > 0:
             if all(historico[d].get(nome, {}).get("na_janela", 0) == 0 for d in dias[-2:]):

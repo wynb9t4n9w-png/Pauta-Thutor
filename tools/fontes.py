@@ -12,8 +12,15 @@ vira filtro de domínio: cliente sem histórico continua coberto pela busca
 aberta, e um veículo que parou de publicar sai sozinho da lista quando as
 edições antigas saem da janela.
 
+Há uma segunda parte, CURADA: fontes/complementares.json. O histórico só
+ensina sobre quem já apareceu; cliente que nunca sai no jornal não deixa
+rastro nenhum. Para esses, o registro guarda à mão as salas de imprensa sem
+feed, os veículos regionais e setoriais que já os cobriram, buscas extras e
+os nomes dos executivos — e o dossiê imprime tudo junto, para as camadas
+(a), (d) e a segunda passada.
+
 Uso:
-    python3 tools/fontes.py <estado.html|estado.json> [--min-dias N]
+    python3 tools/fontes.py <estado.html|estado.json>
 """
 
 import json
@@ -27,6 +34,8 @@ from urllib.parse import urlparse
 # dias de histórico, exigir repetição descartaria quase tudo. O ruído é barato
 # (uma busca a mais), o falso negativo é caro (uma notícia perdida).
 MIN_APARICOES = 1
+
+COMPLEMENTARES = Path(__file__).resolve().parent.parent / "fontes" / "complementares.json"
 
 
 def carrega(caminho: Path) -> dict:
@@ -95,6 +104,30 @@ def dossie(estado: dict) -> dict:
     }
 
 
+def complementares(estado: dict, caminho: Path = COMPLEMENTARES) -> list[str]:
+    """Linhas do registro curado, só para clientes ativos, na ordem da carteira."""
+    if not caminho.exists():
+        return []
+    reg = json.loads(caminho.read_text(encoding="utf8")).get("clientes", {})
+    linhas = []
+    for c in estado.get("clientes", []):
+        cid = c.get("id")
+        r = reg.get(cid)
+        if not r or c.get("ativo") is False:
+            continue
+        linhas.append(f"{cid} — {c.get('nome', cid)}")
+        if r.get("nota"):
+            linhas.append(f"    nota: {r['nota']}")
+        for pg in r.get("paginas", []):
+            linhas.append(f"    ler (d): {pg.get('nome', '')} [{pg.get('tipo', '')}] → {pg['url']}")
+        for b in r.get("buscas", []):
+            linhas.append(f"    buscar (a): {b}")
+        pessoas = [f"{p['nome']} ({p['cargo']})" for p in r.get("pessoas", [])]
+        if pessoas:
+            linhas.append(f"    pessoas (rodada 2): {'; '.join(pessoas)}")
+    return linhas
+
+
 def _dominio(contagem: dict[str, int]) -> str:
     """O host mais frequente daquele veiculo; '?' se nenhuma URL foi parseavel."""
     if not contagem:
@@ -106,10 +139,13 @@ def main() -> None:
     if len(sys.argv) < 2:
         raise SystemExit(__doc__)
 
-    d = dossie(carrega(Path(sys.argv[1])))
+    estado = carrega(Path(sys.argv[1]))
+    d = dossie(estado)
+    extras = complementares(estado)
 
     if not d["linhas"]:
         print("DOSSIÊ DE FONTES: sem histórico ainda. Use apenas as camadas (a) e (b).")
+        _imprime_complementares(extras)
         return
 
     ini, fim = d["periodo"]
@@ -134,6 +170,19 @@ def main() -> None:
         print(f"--- {len(d['sem_historico'])} clientes ativos ainda sem histórico ---")
         print("Estes dependem só das camadas (a) e (b); não os deixe de fora.")
         print("  " + "; ".join(d["sem_historico"]))
+    _imprime_complementares(extras)
+
+
+def _imprime_complementares(extras: list[str]) -> None:
+    if not extras:
+        return
+    print()
+    print("--- fontes complementares, curadas à mão (fontes/complementares.json) ---")
+    print("Para os clientes que o histórico não alcança. Leia as páginas na camada (d),")
+    print("faça as buscas na camada (a) e use os nomes das pessoas na segunda passada.")
+    print("Página que não abrir ou recusar acesso é pulada — nunca contornada.")
+    for l in extras:
+        print(f"  {l}")
 
 
 if __name__ == "__main__":

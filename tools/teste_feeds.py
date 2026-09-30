@@ -188,6 +188,16 @@ def roda():
     confere("feed que não pagina (parcial conhecido) não gera alerta diário",
             feeds.alertas(hist4, "2026-09-23") == [])
 
+    # feed parado desde o cadastro: avisa na primeira noite, não todas as noites
+    velho = {"status": "ok", "na_janela": 0, "alcancou_janela": True, "mais_novo_horas": 41000}
+    confere("feed parado há anos gera alerta",
+            any("está parado" in a for a in feeds.alertas({"2026-09-23": {"CRH": velho}}, "2026-09-23")))
+    confere("feed parado não repete o alerta toda noite",
+            feeds.alertas({"2026-09-22": {"CRH": velho}, "2026-09-23": {"CRH": velho}}, "2026-09-23") == [])
+    vivo = dict(velho, mais_novo_horas=30)
+    confere("feed ativo não é parado",
+            feeds.alertas({"2026-09-23": {"CRH": vivo}}, "2026-09-23") == [])
+
     print()
     if falhas:
         print("%d teste(s) falharam." % len(falhas))
