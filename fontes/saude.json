@@ -2045,5 +2045,441 @@
    "alcancou_janela": true,
    "mais_novo_horas": 853.5
   }
+ },
+ "2026-10-04": {
+  "ASN Nacional": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 20,
+   "na_janela": 15,
+   "paginas": 2,
+   "alcance_horas": 107.4,
+   "alcancou_janela": true,
+   "mais_novo_horas": 34.3
+  },
+  "ASN Bahia": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 10,
+   "na_janela": 1,
+   "paginas": 1,
+   "alcance_horas": 112.2,
+   "alcancou_janela": true,
+   "mais_novo_horas": 60.6
+  },
+  "ASN Minas Gerais": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 10,
+   "na_janela": 5,
+   "paginas": 1,
+   "alcance_horas": 88.1,
+   "alcancou_janela": true,
+   "mais_novo_horas": 33.1
+  },
+  "ASN Mato Grosso": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 10,
+   "na_janela": 7,
+   "paginas": 1,
+   "alcance_horas": 108.3,
+   "alcancou_janela": true,
+   "mais_novo_horas": 32.2
+  },
+  "ASN Pará": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 10,
+   "na_janela": 5,
+   "paginas": 1,
+   "alcance_horas": 108.2,
+   "alcancou_janela": true,
+   "mais_novo_horas": 33.8
+  },
+  "ASN Roraima": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 10,
+   "na_janela": 4,
+   "paginas": 1,
+   "alcance_horas": 274.5,
+   "alcancou_janela": true,
+   "mais_novo_horas": 31.7
+  },
+  "ASN Sergipe": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 10,
+   "na_janela": 1,
+   "paginas": 1,
+   "alcance_horas": 590.1,
+   "alcancou_janela": true,
+   "mais_novo_horas": 59.2
+  },
+  "Jeito Gazin": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 30,
+   "na_janela": 2,
+   "paginas": 1,
+   "alcance_horas": 1499.2,
+   "alcancou_janela": true,
+   "mais_novo_horas": 8.5
+  },
+  "Cemig": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 3,
+   "na_janela": 0,
+   "paginas": 1,
+   "alcance_horas": 251.1,
+   "alcancou_janela": true,
+   "mais_novo_horas": 135.7
+  },
+  "Almeida Junior": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 10,
+   "na_janela": 0,
+   "paginas": 1,
+   "alcance_horas": 2561.2,
+   "alcancou_janela": true,
+   "mais_novo_horas": 800.3
+  },
+  "MundoCoop": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 30,
+   "na_janela": 23,
+   "paginas": 3,
+   "alcance_horas": 86.5,
+   "alcancou_janela": true,
+   "mais_novo_horas": 16.2
+  },
+  "Cooperativismo de Crédito": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 10,
+   "na_janela": 2,
+   "paginas": 1,
+   "alcance_horas": 114.2,
+   "alcancou_janela": true,
+   "mais_novo_horas": 54.6
+  },
+  "Cenário Energia": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 20,
+   "na_janela": 19,
+   "paginas": 2,
+   "alcance_horas": 84.6,
+   "alcancou_janela": true,
+   "mais_novo_horas": 39.5
+  },
+  "MegaWhat": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 40,
+   "na_janela": 30,
+   "paginas": 4,
+   "alcance_horas": 88.7,
+   "alcancou_janela": true,
+   "mais_novo_horas": 33.3
+  },
+  "eixos": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 20,
+   "na_janela": 20,
+   "paginas": 1,
+   "alcance_horas": 56.7,
+   "alcancou_janela": false,
+   "parcial_aceito": true,
+   "mais_novo_horas": 17.2
+  },
+  "Sonho Seguro": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 20,
+   "na_janela": 7,
+   "paginas": 1,
+   "alcance_horas": 129.0,
+   "alcancou_janela": true,
+   "mais_novo_horas": 33.0
+  },
+  "CQCS": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 100,
+   "na_janela": 58,
+   "paginas": 2,
+   "alcance_horas": 107.1,
+   "alcancou_janela": true,
+   "mais_novo_horas": 32.8
+  },
+  "Revista Apólice": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 30,
+   "na_janela": 22,
+   "paginas": 3,
+   "alcance_horas": 89.3,
+   "alcancou_janela": true,
+   "mais_novo_horas": 12.1
+  },
+  "ABAC": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 10,
+   "na_janela": 0,
+   "paginas": 1,
+   "alcance_horas": 1071.7,
+   "alcancou_janela": true,
+   "mais_novo_horas": 231.7
+  },
+  "Logweb": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 10,
+   "na_janela": 5,
+   "paginas": 1,
+   "alcance_horas": 74.1,
+   "alcancou_janela": true,
+   "mais_novo_horas": 49.9
+  },
+  "Diário do Comércio": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 159,
+   "na_janela": 150,
+   "paginas": 16,
+   "alcance_horas": 80.3,
+   "alcancou_janela": true,
+   "mais_novo_horas": 7.0
+  },
+  "Brazil Journal": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 20,
+   "na_janela": 14,
+   "paginas": 2,
+   "alcance_horas": 83.2,
+   "alcancou_janela": true,
+   "mais_novo_horas": 13.6
+  },
+  "NeoFeed": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 30,
+   "na_janela": 21,
+   "paginas": 3,
+   "alcance_horas": 90.3,
+   "alcancou_janela": true,
+   "mais_novo_horas": 16.4
+  },
+  "Folha de Londrina": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 50,
+   "na_janela": 50,
+   "paginas": 1,
+   "alcance_horas": 56.8,
+   "alcancou_janela": false,
+   "parcial_aceito": true,
+   "mais_novo_horas": 8.4
+  },
+  "ND Mais": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 60,
+   "na_janela": 48,
+   "paginas": 3,
+   "alcance_horas": 85.1,
+   "alcancou_janela": true,
+   "mais_novo_horas": 6.6
+  },
+  "ND Mais Infraestrutura": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 20,
+   "na_janela": 13,
+   "paginas": 1,
+   "alcance_horas": 92.9,
+   "alcancou_janela": true,
+   "mais_novo_horas": 31.0
+  },
+  "Economia SC": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 30,
+   "na_janela": 20,
+   "paginas": 1,
+   "alcance_horas": 89.2,
+   "alcancou_janela": true,
+   "mais_novo_horas": 21.2
+  },
+  "Economia PR": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 60,
+   "na_janela": 30,
+   "paginas": 2,
+   "alcance_horas": 131.2,
+   "alcancou_janela": true,
+   "mais_novo_horas": 12.9
+  },
+  "Grupo Amanhã": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 50,
+   "na_janela": 11,
+   "paginas": 1,
+   "alcance_horas": 230.4,
+   "alcancou_janela": true,
+   "parcial_aceito": true,
+   "mais_novo_horas": 36.1
+  },
+  "Diário do Sudoeste": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 60,
+   "na_janela": 55,
+   "paginas": 6,
+   "alcance_horas": 86.0,
+   "alcancou_janela": true,
+   "mais_novo_horas": 3.7
+  },
+  "All Connected Media": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 20,
+   "na_janela": 18,
+   "paginas": 2,
+   "alcance_horas": 79.7,
+   "alcancou_janela": true,
+   "mais_novo_horas": 32.7
+  },
+  "Jornal da Construção Civil": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 10,
+   "na_janela": 2,
+   "paginas": 1,
+   "alcance_horas": 159.5,
+   "alcancou_janela": true,
+   "mais_novo_horas": 32.2
+  },
+  "Revista O Empreiteiro": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 10,
+   "na_janela": 7,
+   "paginas": 1,
+   "alcance_horas": 79.3,
+   "alcancou_janela": true,
+   "mais_novo_horas": 33.7
+  },
+  "54psi": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 16,
+   "na_janela": 8,
+   "paginas": 2,
+   "alcance_horas": 112.2,
+   "alcancou_janela": true,
+   "mais_novo_horas": 16.2
+  },
+  "Portos e Navios": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 200,
+   "na_janela": 10,
+   "paginas": 1,
+   "alcance_horas": 1093.3,
+   "alcancou_janela": true,
+   "parcial_aceito": true,
+   "mais_novo_horas": 30.0
+  },
+  "Informativo dos Portos": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 10,
+   "na_janela": 5,
+   "paginas": 1,
+   "alcance_horas": 141.0,
+   "alcancou_janela": true,
+   "mais_novo_horas": 41.3
+  },
+  "JB Litoral": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 10,
+   "na_janela": 0,
+   "paginas": 1,
+   "alcance_horas": 1802.7,
+   "alcancou_janela": true,
+   "mais_novo_horas": 105.8
+  },
+  "SIMPESC": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 10,
+   "na_janela": 1,
+   "paginas": 1,
+   "alcance_horas": 713.5,
+   "alcancou_janela": true,
+   "mais_novo_horas": 60.4
+  },
+  "Comunidade Sicoob": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 10,
+   "na_janela": 1,
+   "paginas": 1,
+   "alcance_horas": 1430.6,
+   "alcancou_janela": true,
+   "mais_novo_horas": 66.4
+  },
+  "Conexão Safra": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 30,
+   "na_janela": 23,
+   "paginas": 3,
+   "alcance_horas": 91.7,
+   "alcancou_janela": true,
+   "mais_novo_horas": 8.7
+  },
+  "98,7 Raízes FM": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 10,
+   "na_janela": 5,
+   "paginas": 1,
+   "alcance_horas": 87.1,
+   "alcancou_janela": true,
+   "mais_novo_horas": 35.8
+  },
+  "Jornal O Semanário": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 10,
+   "na_janela": 1,
+   "paginas": 1,
+   "alcance_horas": 1625.7,
+   "alcancou_janela": true,
+   "mais_novo_horas": 41.9
+  },
+  "ACAD Brasil": {
+   "status": "ok",
+   "http": 200,
+   "itens_lidos": 8,
+   "na_janela": 0,
+   "paginas": 1,
+   "alcance_horas": 1716.4,
+   "alcancou_janela": true,
+   "mais_novo_horas": 877.5
+  }
  }
 }
