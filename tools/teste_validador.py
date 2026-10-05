@@ -196,7 +196,8 @@ CASOS = [
         ]},
         0,
     ),
-    ("esforço de busca baixo é aviso, não falha", {**base(), "edicoes": [edicao(buscas=100)]}, 0),
+    ("esforço de busca baixo é aviso, não falha", {**base(), "edicoes": [edicao(buscas=80)]}, 0),
+    ("teto de buscas batido é aviso, não falha", {**base(), "edicoes": [edicao(buscas=200)]}, 0),
 
     # --- faixa de abertura: opcional, mas íntegra quando vem ----------------
     (
@@ -337,7 +338,31 @@ def main() -> None:
             if not ok:
                 print("     " + (r.stdout or r.stderr).strip().replace("\n", "\n     "))
 
-    total = len(CASOS) + len(RECALL)
+    # avisos de esforço (05/10/2026): o teto de 200 buscas e a camada (d) parada
+    AVISOS = [
+        ("aviso: bateu no teto de buscas", edicao(3, buscas=200), "bateu no teto", True),
+        ("aviso: 120 buscas não é teto nem esforço baixo", edicao(3, buscas=120), "esperado: pelo menos", False),
+        ("aviso: 120 buscas não é teto", edicao(3, buscas=120), "bateu no teto", False),
+        ("aviso: camada (d) zerada com rede liberada",
+         edicao(3, buscas=120, rede_direta=True, itens_por_camada={"a": 1, "d": 0, "e": 2}),
+         "não rendeu nenhum item", True),
+        ("aviso: camada (d) zerada sem rede não cobra",
+         edicao(3, buscas=120, rede_direta=False, itens_por_camada={"a": 1, "d": 0, "e": 2}),
+         "não rendeu nenhum item", False),
+    ]
+    with tempfile.TemporaryDirectory() as tmp:
+        for nome, ed, trecho, espera in AVISOS:
+            est = Path(tmp) / "estado.json"
+            est.write_text(json.dumps({**base(), "edicoes": [ed]}, ensure_ascii=False), encoding="utf8")
+            r = subprocess.run([sys.executable, str(VALIDADOR), str(est)], capture_output=True, text=True)
+            avisou = trecho in r.stdout
+            ok = r.returncode == 0 and avisou == espera
+            falhou += not ok
+            print(f"{'ok  ' if ok else 'FALHOU'} {nome:<{largura}}  saída={r.returncode} aviso={avisou}")
+            if not ok:
+                print("     " + (r.stdout or r.stderr).strip().replace("\n", "\n     "))
+
+    total = len(CASOS) + len(RECALL) + len(AVISOS)
     print()
     if falhou:
         print(f"{falhou} de {total} testes falharam.")

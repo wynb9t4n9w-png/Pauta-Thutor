@@ -368,6 +368,36 @@ O que mudou:
   institucional.atlaseletro.com.br), UF da Cantu (SC) e da Rocha (PR), site da
   Rocha e da Cooplivre, consultas e exclusões de todos os onze.
 
+## O teto de 200 buscas — 05/10/2026
+
+De 01 a 05/10 as edições caíram para 6 a 15 itens (antes, 20 a 28 nos dias
+úteis). Três causas, de pesos diferentes:
+
+- **Teto do ambiente.** A sessão da rotina aceita no máximo 200 WebSearch,
+  subagentes incluídos. A coleta bateu nele todas as noites, e as 200 buscas
+  renderam de 0 a 2 itens: quem é quieto continua quieto, por mais que se
+  pesquise. O piso de "5 buscas por cliente" do validador empurrava para o teto.
+- **Leitura direta abandonada.** A camada (d) rendia de 12 a 29 itens por noite
+  em setembro e caiu para 0 a 4. CCEE (14 itens em 15 edições) e Sesc DF (13)
+  sumiram: não têm feed, e ninguém mais abria a página. WebFetch não gasta busca.
+- **Corte intencional.** O Sistema S de serviço saiu (de 18 para 3 a 9 itens por
+  noite), como pedia o estudo de 30/09.
+
+O que mudou:
+
+- `tools/fontes.py` imprime no fim do dossiê a lista **LEITURA DIRETA**: site de
+  cada cliente, salas de imprensa curadas e veículos sem feed com 3 ou mais
+  notícias no histórico, sem o que os feeds já leem e sem a grande imprensa
+  (que a camada b cobre). Hoje são 38 páginas. `teste_fontes.py` cobre as
+  regras da lista.
+- O prompt manda **ler primeiro e buscar depois**, com orçamento: ~31 em (a),
+  ~10 em (b), ~20 em buscas complementares, ~20 em (c), 60 reservadas para a
+  segunda passada e cota fixa por subagente. A cobertura registra
+  `leituras_diretas`.
+- O validador passou o piso para 3 buscas por cliente e avisa quando a coleta
+  **bate no teto de 200** e quando a **camada (d) não rende nada** com a rede
+  liberada. Os dois avisos teriam disparado na edição de 05/10.
+
 ## Por que existe um validador
 
 Em 29/08/2026 o disparo automático terminou em **56 segundos**. Não pesquisou

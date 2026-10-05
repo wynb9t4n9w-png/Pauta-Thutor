@@ -57,9 +57,15 @@ DURACAO_CONFORTAVEL_S = 480
 MAX_ITENS_POR_CLIENTE = 4
 # Esforço mínimo esperado de busca, por cliente ativo. Nas duas primeiras noites
 # com a camada (e), 29 e 30/09/2026, as buscas caíram de ~400 para 146 e 117: a
-# rotina deu os feeds por suficientes e encurtou as camadas (a) a (d), que são as
-# únicas que alcançam os clientes sem feed. Abaixo disto, aviso.
-BUSCAS_POR_CLIENTE = 5
+# rotina deu os feeds por suficientes e encurtou as camadas (a) a (d). O piso
+# foi 5 por cliente até 05/10/2026, quando ficou claro que o ambiente limita a
+# sessão a 200 buscas: com 31 clientes, 5 por cliente consome quase tudo antes
+# da segunda passada. Abaixo disto, aviso.
+BUSCAS_POR_CLIENTE = 3
+# Teto de WebSearch por sessão no ambiente da rotina (subagentes incluídos).
+# De 01 a 05/10/2026 a coleta bateu nele todas as noites e a edição de
+# segunda-feira saiu com 6 itens: as 200 buscas renderam 1.
+TETO_BUSCAS = 200
 # Quantos dias para trás a mesma pauta conta como repetida.
 DIAS_REPETICAO = 10
 JANELA_DIAS = 7  # notícia muito antiga indica coleta preguiçosa ou data inventada
@@ -158,6 +164,20 @@ def valida(estado: dict) -> None:
                 f"{BUSCAS_POR_CLIENTE * len(ativos)}). A camada (e) soma, não substitui: os "
                 "clientes sem feed só são alcançados pelas camadas (a) a (d). Em 29 e 30/09 "
                 "as buscas caíram para 146 e 117 e a editoria gente caiu para 1 item."
+            )
+        elif buscas >= TETO_BUSCAS:
+            aviso(
+                f"{buscas} buscas: a coleta bateu no teto de {TETO_BUSCAS} por sessão, e o que "
+                "viesse depois disso não foi pesquisado. Distribua pelo orçamento do PASSO 2 e "
+                "leia a lista LEITURA DIRETA do dossiê, que não gasta busca."
+            )
+
+        camadas_ = cob.get("itens_por_camada") or {}
+        if cob.get("rede_direta") is True and isinstance(camadas_.get("d"), int) and camadas_["d"] == 0:
+            aviso(
+                "a camada (d) não rendeu nenhum item, com a leitura direta liberada. Em setembro "
+                "ela rendia de 12 a 29 itens por noite; CCEE e Sesc DF só chegam por ela. "
+                "Confira se a lista LEITURA DIRETA do dossiê foi lida inteira."
             )
 
         # A segunda passada é sobre ESFORÇO, não sobre resultado: um dia quieto
@@ -459,7 +479,8 @@ def main() -> None:
     ed = (estado.get("edicoes") or [{}])[0]
     cob = ed.get("cobertura") or {}
     print(f"ok  edição {ed.get('data')} · {len(ed.get('itens') or [])} itens")
-    print(f"    cobertura: {cob.get('clientes_varridos')} clientes · {cob.get('buscas')} buscas")
+    print(f"    cobertura: {cob.get('clientes_varridos')} clientes · {cob.get('buscas')} buscas"
+          + (f" · {cob['leituras_diretas']} páginas lidas direto" if isinstance(cob.get("leituras_diretas"), int) else ""))
     if isinstance(cob.get("clientes_silenciosos"), int):
         print(f"    segunda passada: {cob.get('segunda_passada_buscas', 0)} buscas "
               f"sobre {cob['clientes_silenciosos']} clientes silenciosos")

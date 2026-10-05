@@ -36,6 +36,18 @@ from urllib.parse import urlparse
 MIN_APARICOES = 1
 
 COMPLEMENTARES = Path(__file__).resolve().parent.parent / "fontes" / "complementares.json"
+FEEDS = Path(__file__).resolve().parent.parent / "fontes" / "feeds.json"
+
+# Um veículo sem feed entra na lista de leitura a partir de três notícias no
+# histórico: abaixo disso, a lista enche de portais que renderam por acaso.
+MIN_LEITURA = 3
+# Portais nacionais de alto volume: a página inicial não mostra notícia de um
+# cliente específico, e a camada (b) já os cobre por busca.
+GRANDE_IMPRENSA = {
+    "infomoney.com.br", "exame.com", "valor.globo.com", "folha.uol.com.br", "estadao.com.br",
+    "oglobo.globo.com", "g1.globo.com", "cnnbrasil.com.br", "istoedinheiro.com.br",
+    "braziljournal.com", "neofeed.com.br", "poder360.com.br", "bloomberglinea.com.br",
+}
 
 
 def carrega(caminho: Path) -> dict:
@@ -128,6 +140,75 @@ def complementares(estado: dict, caminho: Path = COMPLEMENTARES) -> list[str]:
     return linhas
 
 
+def _host(url: str) -> str:
+    return urlparse(url if "://" in url else "https://" + url).netloc.lower().removeprefix("www.")
+
+
+def leitura(estado: dict, feeds: Path = FEEDS, extras: Path = COMPLEMENTARES) -> list[dict]:
+    """A lista fechada da camada (d): o que ler direto, sem gastar busca.
+
+    Nasceu em 05/10/2026. Com o teto de 200 buscas por sessão, a coleta passou a
+    gastar tudo pesquisando e a leitura direta — que em setembro rendia de 12 a 29
+    itens por noite — caiu para 0 a 4. CCEE (14 itens em 15 edições) e Sesc DF
+    (13) sumiram do jornal: os dois não têm feed, e ninguém mais abria a página.
+    WebFetch não gasta busca. Por isso a lista é explícita e vai inteira.
+
+    Junta, sem repetir domínio e deixando de fora o que a camada (e) já lê:
+      1. o site de cada cliente ativo;
+      2. as páginas de fontes/complementares.json;
+      3. os veículos sem feed que renderam pelo menos MIN_LEITURA notícias.
+    """
+    cobertos = set()
+    if feeds.exists():
+        cobertos = {_host(f["url"]) for f in json.loads(feeds.read_text(encoding="utf8")).get("feeds", [])}
+    ativos = [c for c in estado.get("clientes", []) if c.get("ativo") is not False]
+    nomes = {c["id"]: c.get("nome", c["id"]) for c in ativos}
+    lista: dict[str, dict] = {}
+
+    def poe(url, cid, motivo):
+        h = _host(url)
+        if not h or h in cobertos:
+            return
+        u = url if "://" in url else "https://" + url
+        chave = (h + urlparse(u).path).rstrip("/")
+        if chave not in lista:
+            lista[chave] = {"url": u, "clientes": [], "motivo": motivo}
+        if cid and nomes.get(cid) and nomes[cid] not in lista[chave]["clientes"]:
+            lista[chave]["clientes"].append(nomes[cid])
+
+    for c in ativos:
+        if c.get("site"):
+            poe(c["site"], c["id"], "site do cliente")
+    if extras.exists():
+        reg = json.loads(extras.read_text(encoding="utf8")).get("clientes", {})
+        for cid, r in reg.items():
+            if cid in nomes:
+                for pg in r.get("paginas", []):
+                    poe(pg["url"], cid, pg.get("tipo") or "fonte complementar")
+
+    contagem: dict[str, int] = defaultdict(int)
+    quem: dict[str, set] = defaultdict(set)
+    for ed in estado.get("edicoes", []):
+        for it in ed.get("itens", []):
+            h = _host(it.get("url") or "")
+            if h:
+                contagem[h] += 1
+                quem[h].add(it.get("cliente_id"))
+    # a página de imprensa curada substitui a raiz do site do mesmo cliente
+    especificas = {_host(pg["url"]) for pg in lista.values() if pg["motivo"] != "site do cliente"}
+    lista = {k: pg for k, pg in lista.items()
+             if not (pg["motivo"] == "site do cliente" and _host(pg["url"]) in especificas)}
+    ja = {_host(pg["url"]) for pg in lista.values()}
+    for h, n in sorted(contagem.items(), key=lambda x: -x[1]):
+        # host já na lista por um caminho próprio (sicoob.com.br/web/<cooperativa>)
+        # não ganha uma segunda entrada genérica pela raiz
+        if n < MIN_LEITURA or h in cobertos or h in ja or h in GRANDE_IMPRENSA:
+            continue
+        for cid in sorted(c for c in quem[h] if c):
+            poe("https://" + h + "/", cid, f"rendeu {n} notícias no histórico")
+    return list(lista.values())
+
+
 def _dominio(contagem: dict[str, int]) -> str:
     """O host mais frequente daquele veiculo; '?' se nenhuma URL foi parseavel."""
     if not contagem:
@@ -142,10 +223,12 @@ def main() -> None:
     estado = carrega(Path(sys.argv[1]))
     d = dossie(estado)
     extras = complementares(estado)
+    ler = leitura(estado)
 
     if not d["linhas"]:
         print("DOSSIÊ DE FONTES: sem histórico ainda. Use apenas as camadas (a) e (b).")
         _imprime_complementares(extras)
+        _imprime_leitura(ler)
         return
 
     ini, fim = d["periodo"]
@@ -171,6 +254,20 @@ def main() -> None:
         print("Estes dependem só das camadas (a) e (b); não os deixe de fora.")
         print("  " + "; ".join(d["sem_historico"]))
     _imprime_complementares(extras)
+    _imprime_leitura(ler)
+
+
+def _imprime_leitura(ler: list[dict]) -> None:
+    if not ler:
+        return
+    print()
+    print(f"=== LEITURA DIRETA — camada (d): {len(ler)} páginas, NENHUMA gasta busca ===")
+    print("Leia TODAS, com WebFetch, pedindo as manchetes dos últimos 3 dias com data e link.")
+    print("Já estão fora as que a camada (e) lê por feed. Abra a matéria antes de usar.")
+    print("Página que recusar acesso é pulada e anotada — nunca contornada.")
+    for i, pg in enumerate(ler, 1):
+        quem = ", ".join(pg["clientes"]) or "carteira toda"
+        print(f"  {i:2d}. {pg['url']}  — {quem} ({pg['motivo']})")
 
 
 def _imprime_complementares(extras: list[str]) -> None:
