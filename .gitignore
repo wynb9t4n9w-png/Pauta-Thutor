@@ -8,6 +8,7 @@ pauta-thutor.html
 # coleta. É refeito toda noite e não tem valor histórico — o histórico que
 # importa fica em fontes/saude.json.
 candidatos.json
+paginas.json
 
 # Bytecode que os testes geram ao importar tools/feeds.py.
 __pycache__/

@@ -172,9 +172,10 @@ def leitura(estado: dict, feeds: Path = FEEDS, extras: Path = COMPLEMENTARES) ->
         u = url if "://" in url else "https://" + url
         chave = (h + urlparse(u).path).rstrip("/")
         if chave not in lista:
-            lista[chave] = {"url": u, "clientes": [], "motivo": motivo}
+            lista[chave] = {"url": u, "clientes": [], "ids": [], "motivo": motivo}
         if cid and nomes.get(cid) and nomes[cid] not in lista[chave]["clientes"]:
             lista[chave]["clientes"].append(nomes[cid])
+            lista[chave]["ids"].append(cid)
 
     for c in ativos:
         if c.get("site"):
@@ -262,9 +263,9 @@ def _imprime_leitura(ler: list[dict]) -> None:
         return
     print()
     print(f"=== LEITURA DIRETA — camada (d): {len(ler)} páginas, NENHUMA gasta busca ===")
-    print("Leia TODAS, com WebFetch, pedindo as manchetes dos últimos 3 dias com data e link.")
-    print("Já estão fora as que a camada (e) lê por feed. Abra a matéria antes de usar.")
-    print("Página que recusar acesso é pulada e anotada — nunca contornada.")
+    print("O vigia (tools/paginas.py) lê estas páginas toda noite e entrega as pistas novas e")
+    print("a lista das que não conseguiu ler; essas a coleta abre com WebFetch. Já estão fora")
+    print("as que a camada (e) lê por feed. Página que recusar acesso é pulada — nunca contornada.")
     for i, pg in enumerate(ler, 1):
         quem = ", ".join(pg["clientes"]) or "carteira toda"
         print(f"  {i:2d}. {pg['url']}  — {quem} ({pg['motivo']})")

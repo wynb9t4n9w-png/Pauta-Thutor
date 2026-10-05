@@ -398,6 +398,40 @@ O que mudou:
   **bate no teto de 200** e quando a **camada (d) não rende nada** com a rede
   liberada. Os dois avisos teriam disparado na edição de 05/10.
 
+### O vigia de páginas — 05/10/2026
+
+Subir o teto de buscas não compensa: mesmo em setembro, 100 buscas rendiam de
+1 a 3 notícias, contra 12 a 29 por noite da leitura direta. Então a leitura
+direta virou script, como os feeds:
+
+```bash
+python3 tools/paginas.py pauta-thutor.html --saida paginas.json --vistas fontes/paginas_vistas.json
+```
+
+Ele lê as páginas da lista LEITURA DIRETA (as que não têm feed), com o mesmo
+agente honesto e o mesmo respeito ao robots.txt da camada (e), e guarda uma
+impressão de cada link de manchete que já viu. Na noite seguinte, só o que é
+**novo** vira pista:
+
+- na sala de imprensa curada de um cliente, todo link novo é dele;
+- na raiz do site de um cliente, só o link com cara de notícia (`/noticias`,
+  `/imprensa`, `/blog`, ano) ou com o nome dele — loja on-line cria produto todo
+  dia;
+- num veículo de terceiros, só a manchete que nomeia um cliente, com os termos,
+  o contexto e as exclusões da camada (e).
+
+Página vista pela primeira vez vira linha de base e não gera pista. Pista não
+tem data confiável: a coleta abre a matéria e só usa o que confirmar na janela.
+O que o robô não lê — página montada por JavaScript, site que recusa robô,
+robots.txt que não responde — vai para a lista `nao_lidas`, que a coleta abre
+com WebFetch. Proibição explícita do robots.txt não se lê por ferramenta
+nenhuma.
+
+`fontes/paginas_vistas.json` guarda as impressões **por hash**, inclusive a
+chave de cada página: o repositório é público e a lista inclui o site de cada
+cliente. Na primeira leitura, 32 das 38 páginas responderam. `teste_paginas.py`
+cobre as regras sem rede.
+
 ## Por que existe um validador
 
 Em 29/08/2026 o disparo automático terminou em **56 segundos**. Não pesquisou
