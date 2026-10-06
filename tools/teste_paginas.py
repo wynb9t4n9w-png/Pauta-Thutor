@@ -123,6 +123,10 @@ def roda():
                 "Empresas de energia discutem leilão de transmissão" not in tit)
         confere("pista de gente é reconhecida",
                 tit.get("Sesc DF anuncia nova diretora regional", {}).get("pauta") == "gente")
+        sujo = paginas.manchetes("https://x.br/", b"<a href='/n/1'><img src='a.jpg'>?version=1.0&t=1790086982485"
+                                b"&imageThumbnail=3 Sesc-DF celebra o Dia das Criancas com festa</a>")
+        confere("endereço de miniatura sai do título",
+                sujo and sujo[0]["titulo"] == "Sesc-DF celebra o Dia das Criancas com festa", str(sujo))
         confere("menu, mailto, imagem e 'saiba mais' não viram manchete",
                 not any(t.startswith(("Fale conosco", "Escreva", "Foto", "Saiba")) for t in tit))
 

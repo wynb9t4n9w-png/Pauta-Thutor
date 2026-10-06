@@ -79,6 +79,10 @@ def manchetes(pagina_url: str, corpo: bytes) -> list[dict]:
         if not url.startswith(("http://", "https://")):
             continue
         texto = re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", miolo))).strip()
+        # Liferay e afins deixam o endereço da miniatura no texto do link
+        # ("?version=1.0&t=17900...&imageThumbnail=3 Esporte e Lazer Sesc-DF..."), visto em 06/10/2026.
+        texto = " ".join(w for w in texto.split()
+                         if not (w.startswith(("?", "http", "/")) or ("=" in w and "&" in w))).strip()
         if not (TITULO_MIN <= len(texto) <= TITULO_MAX) or NAO_E_MANCHETE.search(texto):
             continue
         chave = url_canonica(url)
